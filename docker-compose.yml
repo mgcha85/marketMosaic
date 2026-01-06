@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  meilisearch:
+    image: getmeili/meilisearch:v1.6
+    ports:
+      - "7700:7700"
+    environment:
+      - MEILI_MASTER_KEY=${MEILI_API_KEY:-masterKey}
+    volumes:
+      - meili_data:/meili_data
+    restart: unless-stopped
+
+  dx-unified:
+    build: .
+    ports:
+      - "${PORT:-8080}:8080"
+    env_file:
+      - .env
+    environment:
+      # Override paths for container
+      - PORT=8080
+      - DART_DB_PATH=/app/data/dart.db
+      - JUDAL_DB_PATH=/app/data/judal.db
+      - CANDLE_DATA_DIR=/app/data/candles
+      - STORAGE_DIR=/app/storage
+      - MEILI_HOST=http://meilisearch:7700
+      - TZ=Asia/Seoul
+    volumes:
+      - ./data:/app/data
+      - ./storage:/app/storage
+    depends_on:
+      - meilisearch
+    restart: unless-stopped
+
+volumes:
+  meili_data:
