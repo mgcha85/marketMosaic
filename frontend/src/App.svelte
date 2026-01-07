@@ -11,11 +11,13 @@
   // Tab state using URL hash
   let currentTab = "dashboard";
 
-  // Chart timeframe
-  let chartTimeframe = "minute"; // minute, daily, weekly, monthly
+  // Chart timeframe (default to daily since minute data is mock)
+  let chartTimeframe = "daily"; // daily, weekly, monthly (minute disabled)
 
   // Data arrays
-  let candles = [];
+  let candles = []; // Currently displayed candles (max 200)
+  let allCandles = []; // All available candles for lazy loading
+  const MAX_CANDLES = 200; // Max candles to show at once
   let news = [];
   let themes = [];
   let filings = [];
@@ -88,54 +90,95 @@
   }
 
   async function fetchCandles() {
+    console.log("fetchCandles called, timeframe:", chartTimeframe);
     try {
-      if (chartTimeframe === "minute") {
-        // 분봉: 기존 DuckDB 데이터 사용
-        const ts = Math.floor(new Date(selectedDate).getTime() / 1000);
-        const res = await fetch(
-          `/candle/stocks?market=KR&symbol=${stockCode}&timeframe=1m&limit=100&to=${ts}`,
+      // 일봉/주봉/월봉: Kiwoom REST API 사용 (분봉 데이터 없음)
+      const res = await fetch(`/candle/daily/${stockCode}`);
+      console.log("Daily API response status:", res.status);
+      if (res.ok) {
+        const data = await res.json();
+        console.log("Daily candles received:", data.count, "candles");
+        let rawCandles = data.candles || [];
+
+        // Parse date string "2023-06-09 00:00:00" to standard format
+        rawCandles = rawCandles.map((c) => ({
+          ...c,
+          date: c.date.split(" ")[0],
+        }));
+
+        if (chartTimeframe === "weekly") {
+          rawCandles = aggregateToWeekly(rawCandles);
+        } else if (chartTimeframe === "monthly") {
+          rawCandles = aggregateToMonthly(rawCandles);
+        }
+
+        // Store all candles for lazy loading
+        allCandles = rawCandles
+          .map((c) => ({
+            time: new Date(c.date).getTime() / 1000,
+            open: c.open,
+            high: c.high,
+            low: c.low,
+            close: c.close,
+          }))
+          .filter((c) => !isNaN(c.time))
+          .sort((a, b) => a.time - b.time);
+
+        // Display only last MAX_CANDLES initially
+        candles = allCandles.slice(-MAX_CANDLES);
+        console.log(
+          "Processed:",
+          allCandles.length,
+          "total,",
+          candles.length,
+          "displayed",
         );
-        if (res.ok) {
-          const data = await res.json();
-          candles = (data.candles || [])
-            .map((c) => ({
-              time: c.ts,
-              open: c.open,
-              high: c.high,
-              low: c.low,
-              close: c.close,
-            }))
-            .sort((a, b) => a.time - b.time);
-        }
-      } else {
-        // 일봉/주봉/월봉: Kiwoom REST API 사용
-        const res = await fetch(`/candle/daily/${stockCode}`);
-        if (res.ok) {
-          const data = await res.json();
-          let rawCandles = data.candles || [];
-
-          if (chartTimeframe === "weekly") {
-            // 주봉으로 변환
-            rawCandles = aggregateToWeekly(rawCandles);
-          } else if (chartTimeframe === "monthly") {
-            // 월봉으로 변환
-            rawCandles = aggregateToMonthly(rawCandles);
-          }
-
-          candles = rawCandles
-            .map((c) => ({
-              time: new Date(c.date).getTime() / 1000,
-              open: c.open,
-              high: c.high,
-              low: c.low,
-              close: c.close,
-            }))
-            .sort((a, b) => a.time - b.time);
-        }
       }
     } catch (e) {
       console.warn("Candle fetch failed", e);
     }
+  }
+
+  // Handler for when user scrolls/zooms to load more data
+  let loadMoreTimeout = null;
+  let lastLoadTime = 0;
+
+  function handleVisibleRangeChange(range) {
+    // Debounce and rate limit loading
+    if (!range || !range.from || allCandles.length <= MAX_CANDLES) return;
+    if (candles.length >= allCandles.length) return; // Already showing all data
+
+    const now = Date.now();
+    if (now - lastLoadTime < 500) return; // Rate limit: max once per 500ms
+
+    clearTimeout(loadMoreTimeout);
+    loadMoreTimeout = setTimeout(() => {
+      const firstVisibleTime = range.from;
+      const firstCandleTime = candles[0]?.time;
+
+      // Only load more if viewing within 10 candles of the historical start
+      if (firstCandleTime && firstVisibleTime <= firstCandleTime + 10 * 86400) {
+        const currentStartIdx = allCandles.findIndex(
+          (c) => c.time === candles[0].time,
+        );
+        if (currentStartIdx > 0) {
+          lastLoadTime = Date.now();
+          const newStartIdx = Math.max(0, currentStartIdx - 100);
+          const newEndIdx = currentStartIdx + candles.length;
+          candles = allCandles.slice(
+            newStartIdx,
+            Math.min(newEndIdx, allCandles.length),
+          );
+          console.log(
+            "Loaded more:",
+            candles.length,
+            "/",
+            allCandles.length,
+            "candles",
+          );
+        }
+      }
+    }, 200); // 200ms debounce
   }
 
   function aggregateToWeekly(dailyCandles) {
@@ -305,14 +348,11 @@
         <div class="lg:col-span-2 card bg-base-100 shadow-xl">
           <div class="card-body">
             <div class="flex justify-between items-center">
-              <h2 class="card-title">Chart ({candles.length} bars)</h2>
+              <h2 class="card-title">
+                Chart ({candles.length}/{allCandles.length} bars)
+              </h2>
               <!-- Timeframe Tabs -->
               <div class="tabs tabs-boxed tabs-sm">
-                <button
-                  class="tab"
-                  class:tab-active={chartTimeframe === "minute"}
-                  on:click={() => switchTimeframe("minute")}>분봉</button
-                >
                 <button
                   class="tab"
                   class:tab-active={chartTimeframe === "daily"}
@@ -331,15 +371,21 @@
               </div>
             </div>
             <div class="h-[350px]">
-              {#if candles.length > 0}
-                <CandleChart data={candles} height={350} />
-              {:else}
-                <div
-                  class="flex items-center justify-center h-full text-base-content/50"
-                >
-                  Loading chart...
-                </div>
-              {/if}
+              {#key chartTimeframe + "-" + candles.length}
+                {#if candles.length > 0}
+                  <CandleChart
+                    data={candles}
+                    height={350}
+                    onVisibleRangeChange={handleVisibleRangeChange}
+                  />
+                {:else}
+                  <div
+                    class="flex items-center justify-center h-full text-base-content/50"
+                  >
+                    Loading chart...
+                  </div>
+                {/if}
+              {/key}
             </div>
           </div>
         </div>
