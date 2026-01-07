@@ -11,12 +11,20 @@ services:
       - meili_data:/meili_data
     restart: unless-stopped
 
+  frontend:
+    build: ./frontend
+    ports:
+      - "8090:80"
+    depends_on:
+      - dx-unified
+    restart: unless-stopped
+
   dx-unified:
-    build: .
+    build: ./backend
     ports:
       - "${PORT:-8080}:8080"
     env_file:
-      - .env
+      - ./backend/.env
     environment:
       # Override paths for container
       - PORT=8080
@@ -27,8 +35,8 @@ services:
       - MEILI_HOST=http://meilisearch:7700
       - TZ=Asia/Seoul
     volumes:
-      - ./data:/app/data
-      - ./storage:/app/storage
+      - ./backend/data:/app/data
+      - ./backend/storage:/app/storage
     depends_on:
       - meilisearch
     restart: unless-stopped
