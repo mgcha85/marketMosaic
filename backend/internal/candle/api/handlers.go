@@ -9,7 +9,7 @@ import (
 
 	candleDB "dx-unified/internal/candle/database"
 	models "dx-unified/internal/candle/model"
-
+	"dx-unified/internal/candle/providers/kiwoomrest"
 	"dx-unified/internal/candle/service/candles"
 
 	"github.com/gin-gonic/gin"
@@ -17,12 +17,18 @@ import (
 
 // Handler holds dependencies for Candle API handlers
 type Handler struct {
-	service *candles.Service
+	service    *candles.Service
+	kiwoomRest *kiwoomrest.Client
 }
 
 // NewHandler creates a new Candle API handler
 func NewHandler(service *candles.Service) *Handler {
 	return &Handler{service: service}
+}
+
+// NewHandlerWithKiwoom creates a handler with Kiwoom REST client
+func NewHandlerWithKiwoom(service *candles.Service, kiwoomRest *kiwoomrest.Client) *Handler {
+	return &Handler{service: service, kiwoomRest: kiwoomRest}
 }
 
 // RegisterRoutes registers all Candle API routes under /candle prefix
@@ -44,6 +50,10 @@ func (h *Handler) RegisterRoutes(rg *gin.RouterGroup) {
 
 		// Manual Ingest Trigger (Admin/Demo)
 		candle.POST("/ingest", h.TriggerIngest)
+
+		// Kiwoom REST API (fundamentals and daily candles)
+		candle.GET("/fundamental/:code", h.GetFundamental)
+		candle.GET("/daily/:code", h.GetDailyCandles)
 	}
 }
 
@@ -295,4 +305,68 @@ func (h *Handler) TriggerIngest(c *gin.Context) {
 	}()
 
 	c.JSON(http.StatusOK, gin.H{"message": "Ingestion triggered in background"})
+}
+
+// GetFundamental fetches fundamental data from Kiwoom REST API
+func (h *Handler) GetFundamental(c *gin.Context) {
+	code := c.Param("code")
+	if code == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "stock code is required"})
+		return
+	}
+
+	if h.kiwoomRest == nil || !h.kiwoomRest.IsConfigured() {
+		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "Kiwoom REST API not configured"})
+		return
+	}
+
+	result, err := h.kiwoomRest.GetFundamental(code)
+	if err != nil {
+		log.Printf("[KIWOOM-REST] Fundamental fetch error: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Return the first (most recent) fundamental data
+	if len(result.Data) > 0 {
+		c.JSON(http.StatusOK, gin.H{
+			"code": code,
+			"data": result.Data[0],
+		})
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"code": code,
+			"data": nil,
+		})
+	}
+}
+
+// GetDailyCandles fetches daily OHLCV data from Kiwoom REST API
+func (h *Handler) GetDailyCandles(c *gin.Context) {
+	code := c.Param("code")
+	if code == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "stock code is required"})
+		return
+	}
+
+	if h.kiwoomRest == nil || !h.kiwoomRest.IsConfigured() {
+		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "Kiwoom REST API not configured"})
+		return
+	}
+
+	startDate := c.Query("start_date") // YYYY-MM-DD
+	endDate := c.Query("end_date")     // YYYY-MM-DD
+
+	result, err := h.kiwoomRest.GetDailyCandles(code, startDate, endDate)
+	if err != nil {
+		log.Printf("[KIWOOM-REST] Daily candles fetch error: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code":    code,
+		"count":   result.Count,
+		"candles": result.Data,
+	})
 }

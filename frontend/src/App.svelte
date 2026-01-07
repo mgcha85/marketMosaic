@@ -11,11 +11,17 @@
   // Tab state using URL hash
   let currentTab = "dashboard";
 
+  // Chart timeframe
+  let chartTimeframe = "minute"; // minute, daily, weekly, monthly
+
   // Data arrays
   let candles = [];
   let news = [];
   let themes = [];
   let filings = [];
+
+  // Fundamental data (from API)
+  let fundamental = null;
 
   // Realtime state
   let activeRealtimeCategory = "themes";
@@ -35,7 +41,6 @@
   function handleHashChange() {
     const hash = window.location.hash.replace("#", "") || "dashboard";
     currentTab = hash;
-    console.log("Hash changed to:", hash, "currentTab:", currentTab);
   }
 
   async function fetchData() {
@@ -75,26 +80,121 @@
       console.warn("DART fetch failed", e);
     }
 
-    // Fetch Candles
+    // Fetch Candles based on timeframe
+    await fetchCandles();
+
+    // Fetch Fundamental
+    await fetchFundamental();
+  }
+
+  async function fetchCandles() {
     try {
-      const ts = Math.floor(new Date(selectedDate).getTime() / 1000);
-      const res = await fetch(
-        `/candle/stocks?market=KR&symbol=${stockCode}&timeframe=1d&limit=100&to=${ts}`,
-      );
-      if (res.ok) {
-        const data = await res.json();
-        candles = (data.candles || [])
-          .map((c) => ({
-            time: c.ts,
-            open: c.open,
-            high: c.high,
-            low: c.low,
-            close: c.close,
-          }))
-          .sort((a, b) => a.time - b.time);
+      if (chartTimeframe === "minute") {
+        // 분봉: 기존 DuckDB 데이터 사용
+        const ts = Math.floor(new Date(selectedDate).getTime() / 1000);
+        const res = await fetch(
+          `/candle/stocks?market=KR&symbol=${stockCode}&timeframe=1m&limit=100&to=${ts}`,
+        );
+        if (res.ok) {
+          const data = await res.json();
+          candles = (data.candles || [])
+            .map((c) => ({
+              time: c.ts,
+              open: c.open,
+              high: c.high,
+              low: c.low,
+              close: c.close,
+            }))
+            .sort((a, b) => a.time - b.time);
+        }
+      } else {
+        // 일봉/주봉/월봉: Kiwoom REST API 사용
+        const res = await fetch(`/candle/daily/${stockCode}`);
+        if (res.ok) {
+          const data = await res.json();
+          let rawCandles = data.candles || [];
+
+          if (chartTimeframe === "weekly") {
+            // 주봉으로 변환
+            rawCandles = aggregateToWeekly(rawCandles);
+          } else if (chartTimeframe === "monthly") {
+            // 월봉으로 변환
+            rawCandles = aggregateToMonthly(rawCandles);
+          }
+
+          candles = rawCandles
+            .map((c) => ({
+              time: new Date(c.date).getTime() / 1000,
+              open: c.open,
+              high: c.high,
+              low: c.low,
+              close: c.close,
+            }))
+            .sort((a, b) => a.time - b.time);
+        }
       }
     } catch (e) {
       console.warn("Candle fetch failed", e);
+    }
+  }
+
+  function aggregateToWeekly(dailyCandles) {
+    const weeks = {};
+    for (const c of dailyCandles) {
+      const d = new Date(c.date);
+      const weekStart = new Date(d);
+      weekStart.setDate(d.getDate() - d.getDay()); // Start of week (Sunday)
+      const key = weekStart.toISOString().slice(0, 10);
+
+      if (!weeks[key]) {
+        weeks[key] = {
+          date: key,
+          open: c.open,
+          high: c.high,
+          low: c.low,
+          close: c.close,
+        };
+      } else {
+        weeks[key].high = Math.max(weeks[key].high, c.high);
+        weeks[key].low = Math.min(weeks[key].low, c.low);
+        weeks[key].close = c.close; // Last close
+      }
+    }
+    return Object.values(weeks).sort((a, b) => a.date.localeCompare(b.date));
+  }
+
+  function aggregateToMonthly(dailyCandles) {
+    const months = {};
+    for (const c of dailyCandles) {
+      const key = c.date.slice(0, 7); // YYYY-MM
+
+      if (!months[key]) {
+        months[key] = {
+          date: key + "-01",
+          open: c.open,
+          high: c.high,
+          low: c.low,
+          close: c.close,
+        };
+      } else {
+        months[key].high = Math.max(months[key].high, c.high);
+        months[key].low = Math.min(months[key].low, c.low);
+        months[key].close = c.close;
+      }
+    }
+    return Object.values(months).sort((a, b) => a.date.localeCompare(b.date));
+  }
+
+  async function fetchFundamental() {
+    try {
+      const res = await fetch(`/candle/fundamental/${stockCode}`);
+      if (res.ok) {
+        const data = await res.json();
+        fundamental = data.data;
+      }
+    } catch (e) {
+      console.warn("Fundamental fetch failed", e);
+      fundamental = null;
     }
   }
 
@@ -134,17 +234,17 @@
     isRealtimeLoading = false;
   }
 
+  async function switchTimeframe(tf) {
+    chartTimeframe = tf;
+    await fetchCandles();
+  }
+
   onMount(() => {
     initDate();
     fetchRealtimeTabs();
-
-    // Listen for hash changes
     window.addEventListener("hashchange", handleHashChange);
-    handleHashChange(); // Initial check
-
-    return () => {
-      window.removeEventListener("hashchange", handleHashChange);
-    };
+    handleHashChange();
+    return () => window.removeEventListener("hashchange", handleHashChange);
   });
 
   $: if (selectedDate) fetchData();
@@ -177,7 +277,7 @@
             </div>
           </div>
 
-          <!-- Tabs using anchor links -->
+          <!-- Main Tabs -->
           <div class="tabs tabs-boxed bg-base-200 p-1">
             <a
               href="#dashboard"
@@ -196,7 +296,6 @@
             >
           </div>
         </div>
-        <div class="text-xs mt-2 opacity-50">Tab: {currentTab}</div>
       </div>
     </div>
 
@@ -205,7 +304,32 @@
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div class="lg:col-span-2 card bg-base-100 shadow-xl">
           <div class="card-body">
-            <h2 class="card-title">Chart ({candles.length} bars)</h2>
+            <div class="flex justify-between items-center">
+              <h2 class="card-title">Chart ({candles.length} bars)</h2>
+              <!-- Timeframe Tabs -->
+              <div class="tabs tabs-boxed tabs-sm">
+                <button
+                  class="tab"
+                  class:tab-active={chartTimeframe === "minute"}
+                  on:click={() => switchTimeframe("minute")}>분봉</button
+                >
+                <button
+                  class="tab"
+                  class:tab-active={chartTimeframe === "daily"}
+                  on:click={() => switchTimeframe("daily")}>일봉</button
+                >
+                <button
+                  class="tab"
+                  class:tab-active={chartTimeframe === "weekly"}
+                  on:click={() => switchTimeframe("weekly")}>주봉</button
+                >
+                <button
+                  class="tab"
+                  class:tab-active={chartTimeframe === "monthly"}
+                  on:click={() => switchTimeframe("monthly")}>월봉</button
+                >
+              </div>
+            </div>
             <div class="h-[350px]">
               {#if candles.length > 0}
                 <CandleChart data={candles} height={350} />
@@ -382,9 +506,6 @@
                 </tbody>
               </table>
             </div>
-            <div class="text-right text-xs opacity-50 mt-4">
-              Crawled: {realtimeData.crawled_at}
-            </div>
           {:else}
             <div class="text-center py-12 text-base-content/50">
               Select a category
@@ -397,29 +518,88 @@
     {:else if currentTab === "fundamental"}
       <div class="card bg-base-100 shadow-xl">
         <div class="card-body">
-          <h2 class="card-title text-2xl mb-6">Fundamental Analysis</h2>
-          <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div class="stat bg-base-200 rounded-box">
-              <div class="stat-title">PER</div>
-              <div class="stat-value text-primary">12.5</div>
-              <div class="stat-desc">Sector: 15.0</div>
+          <h2 class="card-title text-2xl mb-6">
+            Fundamental Analysis - {stockName}
+          </h2>
+
+          {#if fundamental}
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div class="stat bg-base-200 rounded-box">
+                <div class="stat-title">PER</div>
+                <div class="stat-value text-primary">
+                  {fundamental.PER?.toFixed(2) || "-"}
+                </div>
+                <div class="stat-desc">Price/Earnings</div>
+              </div>
+              <div class="stat bg-base-200 rounded-box">
+                <div class="stat-title">PBR</div>
+                <div class="stat-value text-secondary">
+                  {fundamental.PBR?.toFixed(2) || "-"}
+                </div>
+                <div class="stat-desc">Price/Book</div>
+              </div>
+              <div class="stat bg-base-200 rounded-box">
+                <div class="stat-title">EPS</div>
+                <div class="stat-value text-accent">
+                  {fundamental.EPS?.toLocaleString() || "-"}
+                </div>
+                <div class="stat-desc">원</div>
+              </div>
+              <div class="stat bg-base-200 rounded-box">
+                <div class="stat-title">BPS</div>
+                <div class="stat-value text-info">
+                  {fundamental.BPS?.toLocaleString() || "-"}
+                </div>
+                <div class="stat-desc">원</div>
+              </div>
+              {#if fundamental.DIV}
+                <div class="stat bg-base-200 rounded-box">
+                  <div class="stat-title">배당수익률</div>
+                  <div class="stat-value text-success">
+                    {fundamental.DIV?.toFixed(2)}%
+                  </div>
+                  <div class="stat-desc">Dividend Yield</div>
+                </div>
+              {/if}
+              {#if fundamental.DPS}
+                <div class="stat bg-base-200 rounded-box">
+                  <div class="stat-title">DPS</div>
+                  <div class="stat-value text-warning">
+                    {fundamental.DPS?.toLocaleString()}
+                  </div>
+                  <div class="stat-desc">원/주</div>
+                </div>
+              {/if}
             </div>
-            <div class="stat bg-base-200 rounded-box">
-              <div class="stat-title">PBR</div>
-              <div class="stat-value text-secondary">1.3</div>
-              <div class="stat-desc">Low valuation</div>
+            <div class="text-right text-xs opacity-50 mt-4">
+              기준일: {fundamental.date}
             </div>
-            <div class="stat bg-base-200 rounded-box">
-              <div class="stat-title">ROE</div>
-              <div class="stat-value text-accent">10.2%</div>
-              <div class="stat-desc">↘ 2% YoY</div>
+          {:else}
+            <div class="alert alert-warning">
+              <span
+                >Fundamental 데이터를 가져오려면 .env에 KIWOOM_REST_API_URL을
+                설정하세요.</span
+              >
             </div>
-            <div class="stat bg-base-200 rounded-box">
-              <div class="stat-title">Market Cap</div>
-              <div class="stat-value text-info text-2xl">450T</div>
-              <div class="stat-desc">KRW</div>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4 opacity-50">
+              <div class="stat bg-base-200 rounded-box">
+                <div class="stat-title">PER</div>
+                <div class="stat-value text-primary">-</div>
+              </div>
+              <div class="stat bg-base-200 rounded-box">
+                <div class="stat-title">PBR</div>
+                <div class="stat-value text-secondary">-</div>
+              </div>
+              <div class="stat bg-base-200 rounded-box">
+                <div class="stat-title">EPS</div>
+                <div class="stat-value text-accent">-</div>
+              </div>
+              <div class="stat bg-base-200 rounded-box">
+                <div class="stat-title">BPS</div>
+                <div class="stat-value text-info">-</div>
+              </div>
             </div>
-          </div>
+          {/if}
         </div>
       </div>
     {/if}

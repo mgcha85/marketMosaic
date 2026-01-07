@@ -26,6 +26,7 @@ import (
 	candleDB "dx-unified/internal/candle/database"
 	"dx-unified/internal/candle/providers/alpaca"
 	"dx-unified/internal/candle/providers/kiwoom"
+	"dx-unified/internal/candle/providers/kiwoomrest"
 	"dx-unified/internal/candle/service/candles"
 
 	// News
@@ -144,7 +145,12 @@ func main() {
 
 	// Candle API (/candle/*)
 	if candleDB.DB != nil && candleSvc != nil {
-		candleHandler := candleAPI.NewHandler(candleSvc)
+		// Create Kiwoom REST client for fundamentals and daily candles
+		kiwoomRestClient := kiwoomrest.NewClient(cfg.KiwoomRestAPIURL)
+		if kiwoomRestClient.IsConfigured() {
+			log.Println("[KIWOOM-REST] API client configured")
+		}
+		candleHandler := candleAPI.NewHandlerWithKiwoom(candleSvc, kiwoomRestClient)
 		candleHandler.RegisterRoutes(r.Group(""))
 		log.Println("[CANDLE] API routes registered")
 	}

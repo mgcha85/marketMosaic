@@ -29,9 +29,10 @@ type Config struct {
 	StorageDir string
 
 	// Kiwoom (KR Stock)
-	KiwoomAppKey    string
-	KiwoomAppSecret string
-	KiwoomBaseURL   string
+	KiwoomAppKey     string
+	KiwoomAppSecret  string
+	KiwoomBaseURL    string
+	KiwoomRestAPIURL string // Kiwoom REST API for fundamentals and daily candles
 
 	// Alpaca (US Stock)
 	AlpacaAPIKey    string
@@ -74,6 +75,7 @@ func Load() *Config {
 		KiwoomAppKey:      os.Getenv("KIWOOM_APP_KEY"),
 		KiwoomAppSecret:   os.Getenv("KIWOOM_APP_SECRET"),
 		KiwoomBaseURL:     getEnv("KIWOOM_BASE_URL", "https://api.kiwoom.com"),
+		KiwoomRestAPIURL:  os.Getenv("KIWOOM_REST_API_URL"), // e.g. http://localhost:8083/api
 		AlpacaAPIKey:      os.Getenv("ALPACA_API_KEY"),
 		AlpacaAPISecret:   os.Getenv("ALPACA_API_SECRET"),
 		FMPAPIKey:         os.Getenv("FMP_API_KEY"),
