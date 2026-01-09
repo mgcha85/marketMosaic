@@ -11,8 +11,8 @@
   // Tab state using URL hash
   let currentTab = "dashboard";
 
-  // Chart timeframe (default to daily since minute data is mock)
-  let chartTimeframe = "daily"; // daily, weekly, monthly (minute disabled)
+  // Chart timeframe
+  let chartTimeframe = "daily"; // daily, weekly, monthly, minute
 
   // Data arrays
   let candles = []; // Currently displayed candles (max 200)
@@ -92,18 +92,42 @@
   async function fetchCandles() {
     console.log("fetchCandles called, timeframe:", chartTimeframe);
     try {
-      // 일봉/주봉/월봉: Kiwoom REST API 사용 (분봉 데이터 없음)
-      const res = await fetch(`/candle/daily/${stockCode}`);
-      console.log("Daily API response status:", res.status);
+      // Unified endpoint for KR/US
+      // Map timeframe to backend/API expected format
+      // daily -> D, weekly -> W, monthly -> M
+      // minute -> 1 (1 minute)
+      let tfParam = "D";
+      if (chartTimeframe === "weekly") tfParam = "W";
+      if (chartTimeframe === "monthly") tfParam = "M";
+      if (chartTimeframe === "minute") tfParam = "1";
+
+      const query = new URLSearchParams({
+        market: "KR", // Currently hardcoded for KR as per user context (dashboard is for single stock)
+        symbol: stockCode,
+        timeframe: tfParam,
+        limit: "500", // Fetch plenty for agg
+      });
+
+      // Calculate date range if needed? Backend handles defaults.
+      // Kiwoom API handles start/end.
+
+      const res = await fetch(`/candle/stocks?${query.toString()}`);
+      console.log("Unified API response status:", res.status);
+
       if (res.ok) {
         const data = await res.json();
-        console.log("Daily candles received:", data.count, "candles");
+        console.log("Candles received:", data.count, "candles");
         let rawCandles = data.candles || [];
 
-        // Parse date string "2023-06-09 00:00:00" to standard format
+        // rawCandles now have 'ts' (unix seconds) from backend normalization
+        // Add 'date' string property for aggregation logic if missing?
+        // Aggregation functions expect c.date string or need update.
+        // Let's update rawCandles to have Date object for easier handling.
+
         rawCandles = rawCandles.map((c) => ({
           ...c,
-          date: c.date.split(" ")[0],
+          dateObj: new Date(c.ts * 1000), // Create Date object
+          date: new Date(c.ts * 1000).toISOString().slice(0, 10), // YYYY-MM-DD for agg
         }));
 
         if (chartTimeframe === "weekly") {
@@ -115,7 +139,7 @@
         // Store all candles for lazy loading
         allCandles = rawCandles
           .map((c) => ({
-            time: new Date(c.date).getTime() / 1000,
+            time: c.ts || new Date(c.date).getTime() / 1000, // Ensure time is seconds
             open: c.open,
             high: c.high,
             low: c.low,
@@ -367,6 +391,11 @@
                   class="tab"
                   class:tab-active={chartTimeframe === "monthly"}
                   on:click={() => switchTimeframe("monthly")}>월봉</button
+                >
+                <button
+                  class="tab"
+                  class:tab-active={chartTimeframe === "minute"}
+                  on:click={() => switchTimeframe("minute")}>분봉</button
                 >
               </div>
             </div>

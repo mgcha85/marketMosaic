@@ -65,6 +65,31 @@ type CandleResponse struct {
 	Data  []DailyCandle `json:"data"`
 }
 
+// MinuteCandle represents a minute OHLCV candle
+type MinuteCandle struct {
+	Time   string  `json:"time"` // ISO 8601
+	Open   float64 `json:"open"`
+	High   float64 `json:"high"`
+	Low    float64 `json:"low"`
+	Close  float64 `json:"close"`
+	Volume int64   `json:"volume"`
+}
+
+// MinuteCandleResponse is the response from /stocks/minute-ohlcv
+type MinuteCandleResponse struct {
+	Count int            `json:"count"`
+	Data  []MinuteCandle `json:"data"`
+}
+
+// StockInfo represents a stock in the list
+type StockInfo struct {
+	Code string `json:"code"`
+	Name string `json:"name"`
+}
+
+// StockListResponse is the response from /stocks/list
+type StockListResponse []StockInfo
+
 // =====================
 // API Methods
 // =====================
@@ -132,4 +157,63 @@ func (c *Client) GetDailyCandles(stockCode string, startDate, endDate string) (*
 	}
 
 	return &result, nil
+}
+
+// GetMinuteCandles fetches minute OHLCV data for a stock
+func (c *Client) GetMinuteCandles(stockCode, startDateTime, endDateTime string) (*MinuteCandleResponse, error) {
+	if !c.IsConfigured() {
+		return nil, fmt.Errorf("kiwoom REST API not configured")
+	}
+
+	url := fmt.Sprintf("%s/stocks/minute-ohlcv?code=%s", c.baseURL, stockCode)
+
+	if startDateTime != "" {
+		url += fmt.Sprintf("&start_datetime=%s", startDateTime)
+	}
+	if endDateTime != "" {
+		url += fmt.Sprintf("&end_datetime=%s", endDateTime)
+	}
+
+	resp, err := c.httpClient.Get(url)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch minute candles: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("minute candle API returned status %d", resp.StatusCode)
+	}
+
+	var result MinuteCandleResponse
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return nil, fmt.Errorf("failed to decode minute candle response: %w", err)
+	}
+
+	return &result, nil
+}
+
+// GetStockList fetches the list of all stocks
+func (c *Client) GetStockList() (StockListResponse, error) {
+	if !c.IsConfigured() {
+		return nil, fmt.Errorf("kiwoom REST API not configured")
+	}
+
+	url := fmt.Sprintf("%s/stocks/list", c.baseURL)
+
+	resp, err := c.httpClient.Get(url)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch stock list: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("stock list API returned status %d", resp.StatusCode)
+	}
+
+	var result StockListResponse
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return nil, fmt.Errorf("failed to decode stock list response: %w", err)
+	}
+
+	return result, nil
 }
