@@ -75,7 +75,7 @@ func Load() *Config {
 		KiwoomAppKey:      os.Getenv("KIWOOM_APP_KEY"),
 		KiwoomAppSecret:   os.Getenv("KIWOOM_APP_SECRET"),
 		KiwoomBaseURL:     getEnv("KIWOOM_BASE_URL", "https://api.kiwoom.com"),
-		KiwoomRestAPIURL:  getEnv("KIWOOM_REST_API_URL", "http://131.186.33.55:8083"), // Kiwoom REST API for fundamentals and daily candles
+		KiwoomRestAPIURL:  os.Getenv("KIWOOM_REST_API_URL"),
 		AlpacaAPIKey:      os.Getenv("ALPACA_API_KEY"),
 		AlpacaAPISecret:   os.Getenv("ALPACA_API_SECRET"),
 		FMPAPIKey:         os.Getenv("FMP_API_KEY"),
