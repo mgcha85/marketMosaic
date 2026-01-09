@@ -28,6 +28,9 @@ func (h *Handler) RegisterRoutes(rg *gin.RouterGroup) {
 		news.GET("/articles/:id", h.GetArticle)
 		news.GET("/runs", h.GetRuns)
 		news.GET("/search", h.SearchArticles)
+
+		// Migration
+		news.POST("/migration", h.IngestArticles)
 	}
 }
 
@@ -164,5 +167,24 @@ func (h *Handler) GetRuns(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"count": len(result.Hits),
 		"runs":  result.Hits,
+	})
+}
+
+// IngestArticles handles batch ingestion of news articles
+func (h *Handler) IngestArticles(c *gin.Context) {
+	var articles []meili.ArticleDoc // Using meili package directly for now as store expects it
+	if err := c.ShouldBindJSON(&articles); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := h.store.SaveArticles(articles); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Articles ingested successfully",
+		"count":   len(articles),
 	})
 }

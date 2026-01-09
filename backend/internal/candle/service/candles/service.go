@@ -249,5 +249,10 @@ func (s *Service) failRun(run *model.IngestRun, msg string) error {
 	run.Status = "failed"
 	run.ErrorMessage = msg
 	db.UpdateIngestRun(run)
-	return fmt.Errorf(msg)
+	return fmt.Errorf("%s", msg)
+}
+
+// UpsertCandles ingestion candles manually
+func (s *Service) UpsertCandles(candles []model.Candle) (int, error) {
+	return db.UpsertCandles(candles)
 }

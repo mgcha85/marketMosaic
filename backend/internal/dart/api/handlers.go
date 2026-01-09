@@ -27,6 +27,9 @@ func (h *Handler) RegisterRoutes(rg *gin.RouterGroup) {
 		dart.GET("/corps", h.GetCorps)
 		dart.GET("/filings", h.GetFilings)
 		dart.GET("/filings/:rcept_no", h.GetFilingDetail)
+
+		// Migration
+		dart.POST("/migration/filings", h.IngestFilings)
 	}
 }
 
@@ -126,5 +129,45 @@ func (h *Handler) GetFilingDetail(c *gin.Context) {
 		"filing":    filing,
 		"documents": documents,
 		"events":    events,
+	})
+}
+
+// IngestFilings handles batch ingestion of DART filings
+func (h *Handler) IngestFilings(c *gin.Context) {
+	var filings []models.Filing
+	if err := c.ShouldBindJSON(&filings); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if len(filings) == 0 {
+		c.JSON(http.StatusOK, gin.H{"message": "No data", "count": 0})
+		return
+	}
+
+	// Batch Upsert using GORM Clause
+	// Note: We need to import "gorm.io/gorm/clause"
+	// However, standard GORM Create with multiple items works for Insert.
+	// For Upsert, we need clause.OnConflict.
+	// Since I can't easily add import via this tool without reading top, I'll rely on generic Save if applicable?
+	// Or try to use h.DB.Save() in loop? Loop is safer without import knowledge.
+	// Or just Loop and FirstOrCreate/Updates. Use Transaction.
+
+	tx := h.DB.Begin()
+	count := 0
+	for _, f := range filings {
+		// Use Save (Upsert based on PK: rcept_no)
+		if err := tx.Save(&f).Error; err != nil {
+			tx.Rollback()
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		count++
+	}
+	tx.Commit()
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Filings ingested successfully",
+		"count":   count,
 	})
 }

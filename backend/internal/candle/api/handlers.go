@@ -51,6 +51,9 @@ func (h *Handler) RegisterRoutes(rg *gin.RouterGroup) {
 		// Manual Ingest Trigger (Admin/Demo)
 		candle.POST("/ingest", h.TriggerIngest)
 
+		// Data Migration (Batch Upsert)
+		candle.POST("/data", h.IngestData)
+
 		// Kiwoom REST API (fundamentals and daily candles)
 		candle.GET("/fundamental/:code", h.GetFundamental)
 		candle.GET("/daily/:code", h.GetDailyCandles)
@@ -368,5 +371,25 @@ func (h *Handler) GetDailyCandles(c *gin.Context) {
 		"code":    code,
 		"count":   result.Count,
 		"candles": result.Data,
+	})
+}
+
+// IngestData allows batch ingestion of candle data via JSON
+func (h *Handler) IngestData(c *gin.Context) {
+	var candles []models.Candle
+	if err := c.ShouldBindJSON(&candles); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	count, err := h.service.UpsertCandles(candles)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Data ingested successfully",
+		"count":   count,
 	})
 }

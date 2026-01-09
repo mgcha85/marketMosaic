@@ -8,6 +8,7 @@ import (
 
 	"dx-unified/internal/judal/crawler"
 	"dx-unified/internal/judal/database"
+	"dx-unified/internal/judal/models"
 
 	"github.com/gin-gonic/gin"
 )
@@ -63,6 +64,10 @@ func (h *Handler) RegisterRoutes(rg *gin.RouterGroup) {
 		// 히스토리 및 로그
 		judal.GET("/history/dates", h.GetHistoryDates)
 		judal.GET("/logs", h.GetCrawlLogs)
+
+		// Migration
+		judal.POST("/migration/themes", h.IngestThemes)
+		judal.POST("/migration/stocks", h.IngestStocks)
 	}
 }
 
@@ -407,5 +412,53 @@ func (h *Handler) GetCrawlLogs(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"count": len(logs),
 		"logs":  logs,
+	})
+}
+
+// IngestThemes handles batch ingestion of themes
+func (h *Handler) IngestThemes(c *gin.Context) {
+	var themes []models.Theme
+	if err := c.ShouldBindJSON(&themes); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	repo := database.NewRepository()
+	count := 0
+	for _, t := range themes {
+		if err := repo.UpsertTheme(&t); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		count++
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Themes ingested successfully",
+		"count":   count,
+	})
+}
+
+// IngestStocks handles batch ingestion of stocks
+func (h *Handler) IngestStocks(c *gin.Context) {
+	var stocks []models.Stock
+	if err := c.ShouldBindJSON(&stocks); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	repo := database.NewRepository()
+	count := 0
+	for _, s := range stocks {
+		if err := repo.UpsertStock(&s); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		count++
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Stocks ingested successfully",
+		"count":   count,
 	})
 }
