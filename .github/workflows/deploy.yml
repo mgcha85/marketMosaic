@@ -92,17 +92,17 @@ jobs:
         key: ${{ secrets.DEPLOY_SSH_KEY }}
         script: |
           cd ~/marketMosaic
-          # Login to GHCR (password-stdin is safer)
-          echo ${{ secrets.GHCR_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          # Login to GHCR with Podman
+          echo ${{ secrets.GHCR_TOKEN }} | podman login ghcr.io -u ${{ github.actor }} --password-stdin
           
-          # Set IMAGE_REPO env var for docker-compose (lowercase)
+          # Set IMAGE_REPO env var (lowercase)
           export IMAGE_REPO=$(echo ghcr.io/${{ github.repository }} | tr '[:upper:]' '[:lower:]')
           
           # Pull latest images
-          docker compose -f docker-compose.prod.yml pull
+          podman-compose -f docker-compose.prod.yml pull
           
           # Restart services
-          docker compose -f docker-compose.prod.yml up -d
+          podman-compose -f docker-compose.prod.yml up -d
           
           # Cleanup old images
-          docker image prune -f
+          podman image prune -f
