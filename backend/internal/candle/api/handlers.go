@@ -200,7 +200,17 @@ func (h *Handler) GetCandles(c *gin.Context) {
 			resp, err := h.kiwoomRest.GetDailyCandles(symbol, startDate, endDate)
 			if err == nil {
 				for _, dc := range resp.Data {
-					dt, _ := time.Parse("2006-01-02", dc.Date)
+					// Kiwoom API returns "2023-06-09 00:00:00" format
+					// Extract just the date part
+					datePart := dc.Date
+					if len(dc.Date) > 10 {
+						datePart = dc.Date[:10] // "2023-06-09"
+					}
+					dt, parseErr := time.Parse("2006-01-02", datePart)
+					if parseErr != nil {
+						log.Printf("[KIWOOM] Date parse error for %s: %v", dc.Date, parseErr)
+						continue // Skip this candle
+					}
 					candles = append(candles, models.Candle{
 						Market: "KR",
 						Symbol: symbol,
