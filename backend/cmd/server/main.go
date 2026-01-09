@@ -19,6 +19,7 @@ import (
 
 	// Judal
 	judalAPI "dx-unified/internal/judal/api"
+	"dx-unified/internal/judal/crawler"
 	judalDB "dx-unified/internal/judal/database"
 
 	// Candle
@@ -175,11 +176,30 @@ func main() {
 		sched.AddJob("DART-UpdateCorpCodes", "@weekly", dartJobs.UpdateCorpCodes)
 	}
 
-	// Candle Jobs (20:00 KST = 11:00 UTC)
+	// Candle Jobs (US Market)
+	// US Market closes at 06:00 KST (approx). Schedule ingestion after close.
 	if candleSvc != nil {
-		sched.AddJob("Candle-Ingest-KR", "0 20 * * 1-5", func() {
-			candleSvc.Run(candles.IngestParams{Market: "KR", Timeframe: "1d"})
-			candleSvc.Run(candles.IngestParams{Market: "KR", Timeframe: "1m"})
+		// Daily ingestion at 06:00 KST
+		sched.AddJob("Candle-Ingest-US-1d", "0 6 * * 2-6", func() {
+			candleSvc.Run(candles.IngestParams{Market: "US", Timeframe: "1d"})
+		})
+		// Minute ingestion at 06:10 KST
+		sched.AddJob("Candle-Ingest-US-1m", "10 6 * * 2-6", func() {
+			candleSvc.Run(candles.IngestParams{Market: "US", Timeframe: "1m"})
+		})
+	}
+
+	// Judal Jobs (Themes)
+	// Daily crawl at 00:00 KST
+	if judalDB.DB != nil {
+		judalJob := crawler.NewCrawler(1500 * time.Millisecond)
+		sched.AddJob("Judal-Daily-Crawl", "0 0 * * *", func() {
+			_, err := judalJob.CrawlAllWithHistory()
+			if err != nil {
+				log.Printf("[JUDAL] Daily crawl failed: %v", err)
+			} else {
+				log.Println("[JUDAL] Daily crawl completed")
+			}
 		})
 	}
 

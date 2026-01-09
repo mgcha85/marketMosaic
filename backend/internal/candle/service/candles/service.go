@@ -1,6 +1,7 @@
 package candles
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -110,6 +111,25 @@ func (s *Service) getSymbolsFromSnapshot(ymd, market string) ([]string, error) {
     `, ymd, market).Scan(&symbolsJSON)
 
 	if err != nil {
+		if err == sql.ErrNoRows {
+			// Fallback: Query instruments table directly for active symbols
+			// "today collection target" -> just all active symbols for the market
+			rows, err2 := db.DB.Query("SELECT symbol FROM instruments WHERE market = ? AND is_active = true", market)
+			if err2 != nil {
+				return nil, fmt.Errorf("failed to fallback query instruments: %v", err2)
+			}
+			defer rows.Close()
+
+			var symbols []string
+			for rows.Next() {
+				var sym string
+				if err := rows.Scan(&sym); err != nil {
+					continue
+				}
+				symbols = append(symbols, sym)
+			}
+			return symbols, nil
+		}
 		return nil, err
 	}
 

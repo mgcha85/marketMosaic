@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  meilisearch:
+    image: getmeili/meilisearch:v1.6
+    ports:
+      - "7700:7700"
+    environment:
+      - MEILI_MASTER_KEY=${MEILI_API_KEY:-masterKey}
+    volumes:
+      - meili_data:/meili_data
+    restart: unless-stopped
+    networks:
+      - default
+
+  frontend:
+    # IMAGE_REPO should be set in .env or environment (e.g. ghcr.io/mgcha85/marketmosaic)
+    image: ${IMAGE_REPO:-ghcr.io/mgcha85/marketmosaic}-frontend:latest
+    ports:
+      - "8080:80"
+    depends_on:
+      - dx-unified
+    restart: unless-stopped
+    networks:
+      - default
+
+  dx-unified:
+    image: ${IMAGE_REPO:-ghcr.io/mgcha85/marketmosaic}-backend:latest
+    # Ports removed for security - accessed via internal network by frontend
+    # If direct access needed for debugging, use SSH tunnel
+    # ports:
+    #   - "8081:8080" 
+    # Env file should be present on the server
+    env_file:
+      - .env
+    environment:
+      - PORT=8080
+      - DART_DB_PATH=/app/data/dart.db
+      - JUDAL_DB_PATH=/app/data/judal.db
+      - CANDLE_DATA_DIR=/app/data/candles
+      - STORAGE_DIR=/app/storage
+      - MEILI_HOST=http://meilisearch:7700
+      - TZ=Asia/Seoul
+    volumes:
+      - ./data:/app/data
+      - ./storage:/app/storage
+    depends_on:
+      - meilisearch
+    restart: unless-stopped
+    networks:
+      - default
+
+volumes:
+  meili_data:
+
+
+networks:
+  default:
+    driver: bridge
