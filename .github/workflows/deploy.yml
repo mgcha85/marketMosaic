@@ -102,6 +102,9 @@ jobs:
           # Set IMAGE_REPO env var (lowercase)
           export IMAGE_REPO=$(echo ghcr.io/${{ github.repository }} | tr '[:upper:]' '[:lower:]')
           
+          # Force remove containers to prevent naming conflicts
+          podman rm -f marketmosaic_frontend_1 marketmosaic_dx-unified_1 || true
+
           # Pull latest images
           podman-compose -f docker-compose.prod.yml pull
           
