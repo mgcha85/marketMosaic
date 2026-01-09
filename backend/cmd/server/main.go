@@ -113,8 +113,16 @@ func main() {
 
 	// Candle Service
 	var candleSvc *candles.Service
+	var kiwoomRestClient *kiwoomrest.Client
+
 	if candleDB.DB != nil {
-		kiwoomClient := kiwoom.NewClient(cfg.KiwoomAppKey, cfg.KiwoomAppSecret, cfg.KiwoomBaseURL)
+		// Initialize Kiwoom REST client
+		kiwoomRestClient = kiwoomrest.NewClient(cfg.KiwoomRestAPIURL)
+		if kiwoomRestClient.IsConfigured() {
+			log.Println("[KIWOOM-REST] API client configured")
+		}
+
+		kiwoomClient := kiwoom.NewClient(cfg.KiwoomAppKey, cfg.KiwoomAppSecret, cfg.KiwoomBaseURL, kiwoomRestClient)
 		alpacaClient := alpaca.NewClient(cfg.AlpacaAPIKey, cfg.AlpacaAPISecret)
 		candleSvc = candles.NewService(kiwoomClient, alpacaClient)
 	}
@@ -146,11 +154,6 @@ func main() {
 
 	// Candle API (/candle/*)
 	if candleDB.DB != nil && candleSvc != nil {
-		// Create Kiwoom REST client for fundamentals and daily candles
-		kiwoomRestClient := kiwoomrest.NewClient(cfg.KiwoomRestAPIURL)
-		if kiwoomRestClient.IsConfigured() {
-			log.Println("[KIWOOM-REST] API client configured")
-		}
 		candleHandler := candleAPI.NewHandlerWithKiwoom(candleSvc, kiwoomRestClient)
 		candleHandler.RegisterRoutes(r.Group(""))
 		log.Println("[CANDLE] API routes registered")

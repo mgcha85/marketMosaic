@@ -67,12 +67,12 @@ type CandleResponse struct {
 
 // MinuteCandle represents a minute OHLCV candle
 type MinuteCandle struct {
-	Time   string  `json:"time"` // ISO 8601
+	Time   string  `json:"datetime"` // Matches API: "2026-01-07 09:05:00.000000000"
 	Open   float64 `json:"open"`
 	High   float64 `json:"high"`
 	Low    float64 `json:"low"`
 	Close  float64 `json:"close"`
-	Volume int64   `json:"volume"`
+	Volume float64 `json:"volume"` // API returns float like 4502414.0
 }
 
 // MinuteCandleResponse is the response from /stocks/minute-ohlcv
@@ -216,4 +216,40 @@ func (c *Client) GetStockList() (StockListResponse, error) {
 	}
 
 	return result, nil
+}
+
+// =====================
+// New Methods for Minute API
+// =====================
+
+// MinuteAvailableResponse response from /api/stocks/minute-available
+type MinuteAvailableResponse struct {
+	Count int      `json:"count"`
+	Data  []string `json:"data"`
+}
+
+// GetAvailableMinuteStocks fetches the list of stocks available for minute resolution
+func (c *Client) GetAvailableMinuteStocks() (*MinuteAvailableResponse, error) {
+	if !c.IsConfigured() {
+		return nil, fmt.Errorf("kiwoom REST API not configured")
+	}
+
+	url := fmt.Sprintf("%s/api/stocks/minute-available", c.baseURL)
+
+	resp, err := c.httpClient.Get(url)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch minute available list: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("minute available API returned status %d", resp.StatusCode)
+	}
+
+	var result MinuteAvailableResponse
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return nil, fmt.Errorf("failed to decode minute available response: %w", err)
+	}
+
+	return &result, nil
 }

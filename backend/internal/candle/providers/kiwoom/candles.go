@@ -14,15 +14,94 @@ import (
 // start, end: generic date usage, though Kiwoom often uses "count" or "date based".
 func (c *Client) FetchCandles(symbol, timeframe string, lastTS int64) ([]model.Candle, error) {
 	// Spec provided by user
+	// var trID string
+	// var path string
+
+	// Handle Minute Timeframe via REST API
+	if timeframe == "1m" {
+		if c.RestClient == nil {
+			return nil, fmt.Errorf("kiwoom REST client not initialized")
+		}
+
+		// Set start/end time.
+		// For "today collection", we might want a range.
+		// If lastTS is provided, we can set start_datetime.
+		// ISO 8601 format: 2006-01-02T15:04:05
+		var startDt, endDt string
+
+		if lastTS > 0 {
+			t := time.Unix(lastTS, 0)
+			startDt = t.Format("2006-01-02T15:04:05")
+		} else {
+			// If no lastTS, maybe just today? or recent?
+			// Default to today start 09:00:00
+			now := time.Now()
+			startDt = fmt.Sprintf("%04d-%02d-%02dT09:00:00", now.Year(), now.Month(), now.Day())
+		}
+
+		// End time: now
+		endDt = time.Now().Format("2006-01-02T15:04:05")
+
+		resp, err := c.RestClient.GetMinuteCandles(symbol, startDt, endDt)
+		if err != nil {
+			return nil, fmt.Errorf("failed to fetch minute candles via REST: %w", err)
+		}
+
+		var candles []model.Candle
+		for _, d := range resp.Data {
+			// Parse ISO 8601 time
+			// "2026-01-07 09:05:00.000000000" or similar from example curl output?
+			// The example output showed: "2026-01-07 09:05:00.000000000"
+			// Let's parse with flexibility or fixed format.
+			// "2006-01-02 15:04:05.000000000"
+
+			// Try parsing
+			parsedTime, err := time.Parse("2006-01-02 15:04:05.000000000", d.Time)
+			if err != nil {
+				// Fallback to RFC3339 if format differs
+				parsedTime, err = time.Parse(time.RFC3339, d.Time)
+				if err != nil {
+					log.Printf("failed to parse time %s: %v", d.Time, err)
+					continue
+				}
+			}
+
+			ts := parsedTime.Unix()
+			if ts <= lastTS {
+				continue
+			}
+
+			candles = append(candles, model.Candle{
+				Market:    model.MarketKR,
+				Symbol:    symbol,
+				Timeframe: timeframe,
+				TS:        ts,
+				Open:      d.Open,
+				High:      d.High,
+				Low:       d.Low,
+				Close:     d.Close,
+				Volume:    float64(d.Volume),
+			})
+		}
+		return candles, nil
+	}
+
 	var trID string
 	var path string
 	switch timeframe {
 	case "1d":
 		trID = "ka10081"
 		path = "/api/dostk/chart" // Matches user spec for ka10080 which likely shares endpoint
-	case "1m", "5m":
+	case "5m": // 5m still here? User said "minute" is provided by API. Let's assume 1m is the main target.
+		// If 5m is requested, we could aggregate 1m or check if API supports it.
+		// API example was minute-ohlcv without timeframe param, implying 1m base.
+		// Let's stick to old method for 5m for now or error out?
+		// "분봉만 제공된 API를 사용해서 수정해줘" implies all minute candles.
+		// But the REST API /minute-ohlcv doesn't seem to take period.
+		// It likely returns 1m data. We can aggregate or just use 1m.
+		// For now, let's keep 5m on old path or TODO.
 		trID = "ka10080"
-		path = "/api/dostk/chart" // Expect same for minute
+		path = "/api/dostk/chart"
 	default:
 		return nil, fmt.Errorf("unsupported timeframe: %s", timeframe)
 	}
@@ -40,13 +119,8 @@ func (c *Client) FetchCandles(symbol, timeframe string, lastTS int64) ([]model.C
 		// ka10080 uses tic_scope, ka10081 might use default or date range.
 		// Trying minimal valid common set.
 	}
-	if timeframe == "1m" || timeframe == "5m" {
-		body["tic_scope"] = "30" // 30 mins? Example says 1,3,5...
-		if timeframe == "1m" {
-			body["tic_scope"] = "1"
-		} else {
-			body["tic_scope"] = "5"
-		}
+	if timeframe == "5m" {
+		body["tic_scope"] = "5" // 5m
 	}
 
 	respBody, _, err := c.DoRequest("POST", path, headers, body)

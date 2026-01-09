@@ -2,6 +2,7 @@ package kiwoom
 
 import (
 	"bytes"
+	"dx-unified/internal/candle/providers/kiwoomrest"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -12,22 +13,24 @@ import (
 )
 
 type Client struct {
-	AppKey    string
-	AppSecret string
-	BaseURL   string
-	client    *http.Client
+	AppKey     string
+	AppSecret  string
+	BaseURL    string
+	client     *http.Client
+	RestClient *kiwoomrest.Client
 
 	tokenMu   sync.RWMutex
 	token     string
 	expiresAt time.Time
 }
 
-func NewClient(appKey, appSecret, baseURL string) *Client {
+func NewClient(appKey, appSecret, baseURL string, restClient *kiwoomrest.Client) *Client {
 	return &Client{
-		AppKey:    appKey,
-		AppSecret: appSecret,
-		BaseURL:   strings.TrimRight(baseURL, "/"),
-		client:    &http.Client{Timeout: 30 * time.Second},
+		AppKey:     appKey,
+		AppSecret:  appSecret,
+		BaseURL:    strings.TrimRight(baseURL, "/"),
+		client:     &http.Client{Timeout: 30 * time.Second},
+		RestClient: restClient,
 	}
 }
 

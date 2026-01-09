@@ -197,7 +197,8 @@ func (h *Handler) GetCandles(c *gin.Context) {
 				endDate = time.Unix(tsTo, 0).Format("2006-01-02")
 			}
 
-			resp, err := h.kiwoomRest.GetDailyCandles(symbol, startDate, endDate)
+			var resp *kiwoomrest.CandleResponse
+			resp, err = h.kiwoomRest.GetDailyCandles(symbol, startDate, endDate)
 			if err == nil {
 				for _, dc := range resp.Data {
 					// Kiwoom API returns "2023-06-09 00:00:00" format
@@ -224,24 +225,44 @@ func (h *Handler) GetCandles(c *gin.Context) {
 				}
 			}
 		} else {
-			// Minute
+			// Minute candles
 			startDT := ""
 			endDT := ""
 			if tsFrom > 0 {
 				startDT = time.Unix(tsFrom, 0).Format("2006-01-02T15:04:05")
+			} else {
+				// Default: last 2 market days at 09:00
+				// For KR market, trading starts at 09:00 KST
+				now := time.Now()
+				// Go back 2 days to ensure we get data
+				startDT = now.AddDate(0, 0, -2).Format("2006-01-02") + "T09:00:00"
 			}
 			if tsTo > 0 {
 				endDT = time.Unix(tsTo, 0).Format("2006-01-02T15:04:05")
+			} else {
+				// Default: now
+				endDT = time.Now().Format("2006-01-02T15:04:05")
 			}
 
-			resp, err := h.kiwoomRest.GetMinuteCandles(symbol, startDT, endDT)
+			log.Printf("[KIWOOM] Fetching minute candles: symbol=%s, start=%s, end=%s", symbol, startDT, endDT)
+
+			var resp *kiwoomrest.MinuteCandleResponse
+			resp, err = h.kiwoomRest.GetMinuteCandles(symbol, startDT, endDT)
 			if err == nil {
 				for _, mc := range resp.Data {
-					// ISO 8601 parsing
-					t, _ := time.Parse("2006-01-02T15:04:05", mc.Time) // Simple ISO
-					// Note: Kiwoom might return with offset? Assuming local/KST?
-					// API likely returns KST string. Time.Parse usually UTC if no offset.
-					// We treat it as is for TS.
+					// Format: "2026-01-07 09:05:00.000000000"
+					// We can ignore nanoseconds or parse them.
+					// time.Parse("2006-01-02 15:04:05", ...) might fail on .000000000
+					// Let's use specific laytout
+					t, err := time.Parse("2006-01-02 15:04:05.000000000", mc.Time)
+					if err != nil {
+						// Fallback if needed
+						t, err = time.Parse("2006-01-02 15:04:05", mc.Time)
+						if err != nil {
+							log.Printf("[KIWOOM] Minute time parse failed for %s: %v", mc.Time, err)
+							continue
+						}
+					}
 					candles = append(candles, models.Candle{
 						Market: "KR",
 						Symbol: symbol,
@@ -250,7 +271,7 @@ func (h *Handler) GetCandles(c *gin.Context) {
 						High:   mc.High,
 						Low:    mc.Low,
 						Close:  mc.Close,
-						Volume: float64(mc.Volume),
+						Volume: mc.Volume,
 					})
 				}
 			}
