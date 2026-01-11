@@ -50,18 +50,19 @@ func (h *Handler) GetArticles(c *gin.Context) {
 		filter = append(filter, "source = \""+source+"\"")
 	}
 	if dateTo != "" {
-		// Assume Meilisearch stores published_at as ISO string or timestamp
-		// If input is YYYYMMDD, convert to ISO end of day?
-		// For simplicity, assume User sends valid format or we check string comparison
-		// If stored as "2024-01-01T..." and input is "20240101", comparison might fail.
-		// However, frontend Time Travel sends YYYYMMDD usually.
-		// Let's assume stored is ISO.
-		// If dateTo is 8 chars, format to YYYY-MM-DD
+		// For date filtering to work properly, Meilisearch needs numeric timestamps.
+		// Since published_at is stored as ISO string, string comparison may not work reliably.
+		// For now, skip datetime-based filters (containing 'T') and only filter by date.
+		// A proper fix would convert published_at to Unix timestamps at storage time.
 		if len(dateTo) == 8 {
+			// YYYYMMDD format
 			dateTo = dateTo[:4] + "-" + dateTo[4:6] + "-" + dateTo[6:]
+			filter = append(filter, "published_at <= \""+dateTo+"T23:59:59Z\"")
+		} else if len(dateTo) == 10 {
+			// YYYY-MM-DD format
+			filter = append(filter, "published_at <= \""+dateTo+"T23:59:59Z\"")
 		}
-		// Less than or equal to end of that day
-		filter = append(filter, "published_at <= \""+dateTo+"T23:59:59Z\"")
+		// Datetime with time (contains T) is skipped for now since comparison is unreliable
 	}
 
 	searchReq := &meilisearch.SearchRequest{
@@ -117,10 +118,13 @@ func (h *Handler) SearchArticles(c *gin.Context) {
 
 	filter := []string{}
 	if dateTo != "" {
+		// Same logic as GetArticles - only filter by date, not datetime
 		if len(dateTo) == 8 {
 			dateTo = dateTo[:4] + "-" + dateTo[4:6] + "-" + dateTo[6:]
+			filter = append(filter, "published_at <= \""+dateTo+"T23:59:59Z\"")
+		} else if len(dateTo) == 10 {
+			filter = append(filter, "published_at <= \""+dateTo+"T23:59:59Z\"")
 		}
-		filter = append(filter, "published_at <= \""+dateTo+"T23:59:59Z\"")
 	}
 
 	// Allow empty query to list all/recent articles

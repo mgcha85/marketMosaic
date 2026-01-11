@@ -1,6 +1,27 @@
 <script>
+  import { createEventDispatcher } from "svelte";
+
   export let title = "Market Mosaic";
   export let selectedDate = "";
+  export let stockCode = "";
+  export let stockName = "";
+
+  const dispatch = createEventDispatcher();
+
+  let searchInput = "";
+
+  function handleSearch() {
+    if (searchInput.trim()) {
+      dispatch("search", { code: searchInput.trim() });
+      searchInput = "";
+    }
+  }
+
+  function handleKeydown(e) {
+    if (e.key === "Enter") {
+      handleSearch();
+    }
+  }
 </script>
 
 <div class="navbar bg-base-100 shadow-lg border-b border-base-300">
@@ -27,14 +48,16 @@
   <div class="navbar-center hidden lg:flex">
     <div class="stats shadow bg-base-200">
       <div class="stat py-2 px-4">
-        <div class="stat-title text-xs">Time Travel Mode</div>
-        <div class="stat-value text-sm text-primary">Historical Data</div>
+        <div class="stat-title text-xs">현재 종목</div>
+        <div class="stat-value text-sm text-primary">
+          {stockName} ({stockCode})
+        </div>
       </div>
     </div>
   </div>
 
   <div class="navbar-end gap-2">
-    <!-- Professional Date-Time Picker -->
+    <!-- Date Picker -->
     <div class="form-control">
       <label class="label py-0">
         <span class="label-text text-xs opacity-70">
@@ -52,7 +75,7 @@
               d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
             />
           </svg>
-          Data As Of
+          기준일
         </span>
       </label>
       <input
@@ -64,13 +87,21 @@
 
     <!-- Search Stock -->
     <div class="form-control hidden md:block">
-      <div class="input-group input-group-sm">
+      <label class="label py-0">
+        <span class="label-text text-xs opacity-70">종목 검색</span>
+      </label>
+      <div class="join">
         <input
           type="text"
-          placeholder="Search Stock..."
-          class="input input-bordered input-sm w-32 lg:w-48"
+          placeholder="종목코드 입력..."
+          class="input input-bordered input-sm w-32 lg:w-40 join-item"
+          bind:value={searchInput}
+          on:keydown={handleKeydown}
         />
-        <button class="btn btn-sm btn-square btn-primary">
+        <button
+          class="btn btn-sm btn-primary join-item"
+          on:click={handleSearch}
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             class="h-4 w-4"

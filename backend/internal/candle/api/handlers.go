@@ -159,17 +159,17 @@ func (h *Handler) GetCandles(c *gin.Context) {
 	market := c.Query("market")
 	symbol := c.Query("symbol")
 	timeframe := c.DefaultQuery("timeframe", "1m")
-	dateFrom := c.Query("date_from")
-	dateTo := c.Query("date_to")
+	tsFromStr := c.Query("ts_from")
+	tsToStr := c.Query("ts_to")
 	limitStr := c.DefaultQuery("limit", "100")
 	limit, _ := strconv.Atoi(limitStr)
 
 	var tsFrom, tsTo int64
-	if dateFrom != "" {
-		tsFrom, _ = strconv.ParseInt(dateFrom, 10, 64)
+	if tsFromStr != "" {
+		tsFrom, _ = strconv.ParseInt(tsFromStr, 10, 64)
 	}
-	if dateTo != "" {
-		tsTo, _ = strconv.ParseInt(dateTo, 10, 64)
+	if tsToStr != "" {
+		tsTo, _ = strconv.ParseInt(tsToStr, 10, 64)
 	}
 
 	// 1. KR Market Proxy (Kiwoom)
@@ -231,11 +231,11 @@ func (h *Handler) GetCandles(c *gin.Context) {
 			if tsFrom > 0 {
 				startDT = time.Unix(tsFrom, 0).Format("2006-01-02T15:04:05")
 			} else {
-				// Default: last 2 market days at 09:00
+				// Default: last 5 market days at 09:00
 				// For KR market, trading starts at 09:00 KST
+				// Use 5 days to account for weekends
 				now := time.Now()
-				// Go back 2 days to ensure we get data
-				startDT = now.AddDate(0, 0, -2).Format("2006-01-02") + "T09:00:00"
+				startDT = now.AddDate(0, 0, -5).Format("2006-01-02") + "T09:00:00"
 			}
 			if tsTo > 0 {
 				endDT = time.Unix(tsTo, 0).Format("2006-01-02T15:04:05")

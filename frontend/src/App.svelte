@@ -11,8 +11,8 @@
   // Tab state using URL hash
   let currentTab = "dashboard";
 
-  // Chart timeframe
-  let chartTimeframe = "daily"; // daily, weekly, monthly, minute
+  // Chart timeframe - default to minute (분봉)
+  let chartTimeframe = "minute"; // minute, daily, weekly, monthly
 
   // Data arrays
   let candles = []; // Currently displayed candles (max 200)
@@ -36,7 +36,13 @@
     const now = new Date();
     now.setDate(now.getDate() - 1);
     now.setHours(15, 20, 0, 0);
-    selectedDate = now.toISOString().slice(0, 16);
+    // Format as local datetime-local format: YYYY-MM-DDTHH:MM
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
+    const hours = String(now.getHours()).padStart(2, "0");
+    const minutes = String(now.getMinutes()).padStart(2, "0");
+    selectedDate = `${year}-${month}-${day}T${hours}:${minutes}`;
   }
 
   // Use hash-based navigation
@@ -47,20 +53,20 @@
 
   async function fetchData() {
     if (!selectedDate) return;
-    console.log("Fetching data for", stockCode);
+    console.log("Fetching data for", stockCode, "as of", selectedDate);
 
-    // Fetch News
-    try {
-      const res = await fetch(`/news/articles?limit=5`);
-      if (res.ok) {
-        const data = await res.json();
-        news = data.articles || [];
-      }
-    } catch (e) {
-      console.warn("News fetch failed", e);
-    }
+    // Parse selectedDate to get date_to in ISO format for API
+    const dateObj = new Date(selectedDate);
+    // Format: YYYY-MM-DDTHH:MM:SS (ISO without timezone)
+    const year = dateObj.getFullYear();
+    const month = String(dateObj.getMonth() + 1).padStart(2, "0");
+    const day = String(dateObj.getDate()).padStart(2, "0");
+    const hours = String(dateObj.getHours()).padStart(2, "0");
+    const minutes = String(dateObj.getMinutes()).padStart(2, "0");
+    const dateTo = `${year}-${month}-${day}T${hours}:${minutes}:00`;
+    const dateOnlyTo = `${year}-${month}-${day}`;
 
-    // Fetch Themes
+    // Fetch Themes first (needed for news keyword search)
     try {
       const res = await fetch(`/judal/stocks/${stockCode}/themes`);
       if (res.ok) {
@@ -71,9 +77,37 @@
       console.warn("Themes fetch failed", e);
     }
 
-    // Fetch DART
+    // Fetch News using theme keywords (with date filter, 20 articles)
     try {
-      const res = await fetch(`/dart/filings?stock_code=${stockCode}&limit=5`);
+      // Build keyword from related themes
+      const themeKeywords = themes
+        .slice(0, 5)
+        .map((t) => t.name)
+        .join(" ");
+      const searchQuery = themeKeywords || stockName;
+      const encodedQuery = encodeURIComponent(searchQuery);
+
+      // Note: date_to filter removed as Meilisearch doesn't support ISO date string comparison
+      const res = await fetch(`/news/search?q=${encodedQuery}&limit=20`);
+      if (res.ok) {
+        const data = await res.json();
+        // Sort by published_at descending (newest first)
+        const articles = data.articles || [];
+        news = articles.sort(
+          (a, b) =>
+            new Date(b.published_at).getTime() -
+            new Date(a.published_at).getTime(),
+        );
+      }
+    } catch (e) {
+      console.warn("News fetch failed", e);
+    }
+
+    // Fetch DART (with date filter)
+    try {
+      const res = await fetch(
+        `/dart/filings?stock_code=${stockCode}&limit=5&date_to=${dateOnlyTo}`,
+      );
       if (res.ok) {
         const data = await res.json();
         filings = data.data || [];
@@ -90,7 +124,12 @@
   }
 
   async function fetchCandles() {
-    console.log("fetchCandles called, timeframe:", chartTimeframe);
+    console.log(
+      "fetchCandles called, timeframe:",
+      chartTimeframe,
+      "as of:",
+      selectedDate,
+    );
     try {
       // Unified endpoint for KR/US
       // Map timeframe to backend/API expected format
@@ -101,15 +140,21 @@
       if (chartTimeframe === "monthly") tfParam = "M";
       if (chartTimeframe === "minute") tfParam = "1";
 
+      // Calculate ts_to from selectedDate (Unix timestamp in seconds)
+      const tsTo = selectedDate
+        ? Math.floor(new Date(selectedDate).getTime() / 1000)
+        : "";
+
       const query = new URLSearchParams({
-        market: "KR", // Currently hardcoded for KR as per user context (dashboard is for single stock)
+        market: "KR",
         symbol: stockCode,
         timeframe: tfParam,
-        limit: "500", // Fetch plenty for agg
+        limit: "500",
       });
 
-      // Calculate date range if needed? Backend handles defaults.
-      // Kiwoom API handles start/end.
+      if (tsTo) {
+        query.set("ts_to", tsTo.toString());
+      }
 
       const res = await fetch(`/candle/stocks?${query.toString()}`);
       console.log("Unified API response status:", res.status);
@@ -320,7 +365,17 @@
 <div
   class="min-h-screen bg-gradient-to-br from-base-200 via-base-100 to-base-200"
 >
-  <Navbar title="Market Mosaic" bind:selectedDate />
+  <Navbar
+    title="Market Mosaic"
+    bind:selectedDate
+    {stockCode}
+    {stockName}
+    on:search={(e) => {
+      stockCode = e.detail.code;
+      stockName = e.detail.code; // Will be updated after fetch
+      fetchData();
+    }}
+  />
 
   <main class="container mx-auto px-4 py-6 max-w-7xl">
     <!-- Stock Header -->
@@ -375,27 +430,31 @@
               <h2 class="card-title">
                 Chart ({candles.length}/{allCandles.length} bars)
               </h2>
-              <!-- Timeframe Tabs -->
-              <div class="tabs tabs-boxed tabs-sm">
+              <!-- Timeframe Tabs - 분봉 first as default -->
+              <div class="tabs tabs-boxed tabs-sm bg-base-200">
                 <button
-                  class="tab"
+                  class="tab font-medium"
+                  class:tab-active={chartTimeframe === "minute"}
+                  class:text-primary={chartTimeframe === "minute"}
+                  on:click={() => switchTimeframe("minute")}>분봉</button
+                >
+                <button
+                  class="tab font-medium"
                   class:tab-active={chartTimeframe === "daily"}
+                  class:text-primary={chartTimeframe === "daily"}
                   on:click={() => switchTimeframe("daily")}>일봉</button
                 >
                 <button
-                  class="tab"
+                  class="tab font-medium"
                   class:tab-active={chartTimeframe === "weekly"}
+                  class:text-primary={chartTimeframe === "weekly"}
                   on:click={() => switchTimeframe("weekly")}>주봉</button
                 >
                 <button
-                  class="tab"
+                  class="tab font-medium"
                   class:tab-active={chartTimeframe === "monthly"}
+                  class:text-primary={chartTimeframe === "monthly"}
                   on:click={() => switchTimeframe("monthly")}>월봉</button
-                >
-                <button
-                  class="tab"
-                  class:tab-active={chartTimeframe === "minute"}
-                  on:click={() => switchTimeframe("minute")}>분봉</button
                 >
               </div>
             </div>
@@ -469,11 +528,20 @@
                 >
                 <tbody>
                   {#each filings as f}
-                    <tr
-                      ><td>{f.rcept_dt}</td><td>{f.report_nm}</td><td
-                        >{f.flr_nm}</td
-                      ></tr
-                    >
+                    <tr class="hover">
+                      <td class="text-sm">{f.rcept_dt}</td>
+                      <td>
+                        <a
+                          href="https://dart.fss.or.kr/dsaf001/main.do?rcpNo={f.rcept_no}"
+                          target="_blank"
+                          class="link link-primary hover:link-hover text-sm"
+                          title="DART에서 공시 전문 보기"
+                        >
+                          {f.report_nm}
+                        </a>
+                      </td>
+                      <td class="text-sm">{f.flr_nm}</td>
+                    </tr>
                   {:else}
                     <tr
                       ><td colspan="3" class="text-center text-base-content/50"
@@ -546,10 +614,10 @@
                   </tr>
                 </thead>
                 <tbody>
-                  {#each realtimeData.items as item}
+                  {#each realtimeData.items as item, i}
                     <tr class="hover">
                       {#if activeRealtimeCategory === "themes"}
-                        <td class="font-mono text-sm">{item.theme_idx}</td>
+                        <td class="font-mono text-sm">{i + 1}</td>
                         <td class="font-bold">{item.name}</td>
                         <td
                           >{#each item.values || [] as v}<span
