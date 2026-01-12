@@ -12,6 +12,9 @@ import (
 	"dx-unified/internal/shared/config"
 	"dx-unified/internal/shared/scheduler"
 
+	// Admin
+	adminAPI "dx-unified/internal/admin/api"
+
 	// DART
 	dartAPI "dx-unified/internal/dart/api"
 	dartDB "dx-unified/internal/dart/database"
@@ -165,6 +168,13 @@ func main() {
 		newsHandler.RegisterRoutes(r.Group(""))
 		log.Println("[NEWS] API routes registered")
 	}
+
+	// Admin API (/admin/*)
+	// Inject Judal Repo and Dart DB
+	adminRepo := judalDB.NewRepository() // Creates repo using global DB instance
+	adminHandler := adminAPI.NewHandler(adminRepo, dartDB.GetDB())
+	adminHandler.RegisterRoutes(r.Group(""))
+	log.Println("[ADMIN] API routes registered")
 
 	// ========== Unified Scheduler ==========
 

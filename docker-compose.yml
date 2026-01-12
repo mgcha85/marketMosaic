@@ -28,6 +28,7 @@ services:
     environment:
       # Override paths for container
       - PORT=8080
+      - GIN_MODE=release
       - DART_DB_PATH=/app/data/dart.db
       - JUDAL_DB_PATH=/app/data/judal.db
       - CANDLE_DATA_DIR=/app/data/candles

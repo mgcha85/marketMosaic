@@ -1,6 +1,8 @@
 package config
 
 import (
+	"encoding/json"
+	"log"
 	"os"
 
 	"github.com/joho/godotenv"
@@ -9,57 +11,57 @@ import (
 // Config holds all configuration for the unified application
 type Config struct {
 	// Server
-	Port string
+	Port string `json:"port"`
 
 	// SQLite Paths
-	DartDBPath  string
-	JudalDBPath string
+	DartDBPath  string `json:"dart_db_path"`
+	JudalDBPath string `json:"judal_db_path"`
 
 	// Candle Data (Parquet/Hive Partition)
-	CandleDataDir string
+	CandleDataDir string `json:"candle_data_dir"`
 
 	// Meilisearch (News)
-	MeiliHost   string
-	MeiliAPIKey string
+	MeiliHost   string `json:"meili_host"`
+	MeiliAPIKey string `json:"meili_api_key"`
 
 	// DART API
-	DartAPIKey string
+	DartAPIKey string `json:"dart_api_key"`
 
 	// Storage
-	StorageDir string
+	StorageDir string `json:"storage_dir"`
 
 	// Kiwoom (KR Stock)
-	KiwoomAppKey     string
-	KiwoomAppSecret  string
-	KiwoomBaseURL    string
-	KiwoomRestAPIURL string // Kiwoom REST API for fundamentals and daily candles
+	KiwoomAppKey     string `json:"kiwoom_app_key"`
+	KiwoomAppSecret  string `json:"kiwoom_app_secret"`
+	KiwoomBaseURL    string `json:"kiwoom_base_url"`
+	KiwoomRestAPIURL string `json:"kiwoom_rest_api_url"`
 
 	// Alpaca (US Stock)
-	AlpacaAPIKey    string
-	AlpacaAPISecret string
+	AlpacaAPIKey    string `json:"alpaca_api_key"`
+	AlpacaAPISecret string `json:"alpaca_api_secret"`
 
 	// FMP (US Universe)
-	FMPAPIKey string
+	FMPAPIKey string `json:"fmp_api_key"`
 
 	// Naver News
-	NaverClientID     string
-	NaverClientSecret string
+	NaverClientID     string `json:"naver_client_id"`
+	NaverClientSecret string `json:"naver_client_secret"`
 
 	// NewsAPI
-	NewsAPIKey string
+	NewsAPIKey string `json:"newsapi_key"`
 
 	// Judal
-	CrawlDelay int
+	CrawlDelay int `json:"crawl_delay"`
 
 	// News Filtering
-	NaverQueries       []string
-	EconKeywordsAllow  []string
-	EconKeywordsBlock  []string
-	TitleKeywordsBlock []string
-	GenericNewsBlock   []string
+	NaverQueries       []string `json:"naver_queries"`
+	EconKeywordsAllow  []string `json:"econ_keywords_allow"`
+	EconKeywordsBlock  []string `json:"econ_keywords_block"`
+	TitleKeywordsBlock []string `json:"title_keywords_block"`
+	GenericNewsBlock   []string `json:"generic_news_block"`
 }
 
-// Load reads configuration from environment variables
+// Load reads configuration from environment variables and optional config.json
 func Load() *Config {
 	_ = godotenv.Load()
 
@@ -88,7 +90,71 @@ func Load() *Config {
 		EconKeywordsBlock: []string{"부고", "인사", "결혼", "모집"},
 	}
 
+	// Try loading from data/config.json to override
+	// configPath should be flexible based on where 'data' dir is relative to execution
+	// Usually ./data/config.json in container
+	configPath := "./data/config.json"
+
+	// Check if file exists
+	if _, err := os.Stat(configPath); err == nil {
+		file, err := os.Open(configPath)
+		if err == nil {
+			defer file.Close()
+			var jsonCfg Config
+			decoder := json.NewDecoder(file)
+			if err := decoder.Decode(&jsonCfg); err == nil {
+				log.Println("Loaded configuration overrides from config.json")
+				overrideConfig(cfg, &jsonCfg)
+			} else {
+				log.Printf("Failed to parse config.json: %v", err)
+			}
+		}
+	}
+
 	return cfg
+}
+
+func overrideConfig(base, override *Config) {
+	// Helper to override only non-empty string fields
+	// Integer fields (CrawlDelay) are overridden if non-zero
+
+	if override.DartAPIKey != "" {
+		base.DartAPIKey = override.DartAPIKey
+	}
+	if override.KiwoomAppKey != "" {
+		base.KiwoomAppKey = override.KiwoomAppKey
+	}
+	if override.KiwoomAppSecret != "" {
+		base.KiwoomAppSecret = override.KiwoomAppSecret
+	}
+	if override.KiwoomBaseURL != "" {
+		base.KiwoomBaseURL = override.KiwoomBaseURL
+	}
+	if override.KiwoomRestAPIURL != "" {
+		base.KiwoomRestAPIURL = override.KiwoomRestAPIURL
+	}
+	if override.AlpacaAPIKey != "" {
+		base.AlpacaAPIKey = override.AlpacaAPIKey
+	}
+	if override.AlpacaAPISecret != "" {
+		base.AlpacaAPISecret = override.AlpacaAPISecret
+	}
+	if override.FMPAPIKey != "" {
+		base.FMPAPIKey = override.FMPAPIKey
+	}
+	if override.NaverClientID != "" {
+		base.NaverClientID = override.NaverClientID
+	}
+	if override.NaverClientSecret != "" {
+		base.NaverClientSecret = override.NaverClientSecret
+	}
+	if override.NewsAPIKey != "" {
+		base.NewsAPIKey = override.NewsAPIKey
+	}
+	if override.CrawlDelay > 0 {
+		base.CrawlDelay = override.CrawlDelay
+	}
+	// Add more overrides as needed
 }
 
 func getEnv(key, defaultVal string) string {

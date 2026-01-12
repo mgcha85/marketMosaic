@@ -1,6 +1,7 @@
 <script>
   import Navbar from "./lib/components/Navbar.svelte";
   import CandleChart from "./lib/components/CandleChart.svelte";
+  import AdminPanel from "./lib/components/AdminPanel.svelte";
   import { onMount } from "svelte";
 
   // Stock state
@@ -47,6 +48,11 @@
 
   // Use hash-based navigation
   function handleHashChange() {
+    // Check path for /admin support
+    if (window.location.pathname === "/admin") {
+      currentTab = "admin";
+      return;
+    }
     const hash = window.location.hash.replace("#", "") || "dashboard";
     currentTab = hash;
   }
@@ -745,6 +751,8 @@
           {/if}
         </div>
       </div>
+    {:else if currentTab === "admin"}
+      <AdminPanel />
     {/if}
   </main>
 </div>
