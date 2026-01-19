@@ -59,6 +59,9 @@ type Config struct {
 	EconKeywordsBlock  []string `json:"econ_keywords_block"`
 	TitleKeywordsBlock []string `json:"title_keywords_block"`
 	GenericNewsBlock   []string `json:"generic_news_block"`
+
+	// News Fetch Interval (Cron expression)
+	NewsFetchCron string `json:"news_fetch_cron"`
 }
 
 // Load reads configuration from environment variables and optional config.json
@@ -84,6 +87,7 @@ func Load() *Config {
 		NaverClientID:     os.Getenv("NAVER_CLIENT_ID"),
 		NaverClientSecret: os.Getenv("NAVER_CLIENT_SECRET"),
 		NewsAPIKey:        os.Getenv("NEWSAPI_KEY"),
+		NewsFetchCron:     getEnv("NEWS_FETCH_CRON", "*/15 * * * *"),
 		CrawlDelay:        1500,
 		NaverQueries:      []string{"주식", "증시", "경제", "코스피", "코스닥"},
 		EconKeywordsAllow: []string{"금리", "투자", "실적", "상장", "매수", "매도"},
@@ -150,6 +154,9 @@ func overrideConfig(base, override *Config) {
 	}
 	if override.NewsAPIKey != "" {
 		base.NewsAPIKey = override.NewsAPIKey
+	}
+	if override.NewsFetchCron != "" {
+		base.NewsFetchCron = override.NewsFetchCron
 	}
 	if override.CrawlDelay > 0 {
 		base.CrawlDelay = override.CrawlDelay

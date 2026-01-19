@@ -203,9 +203,9 @@ func main() {
 		})
 	}
 
-	// News Jobs (Every 15 mins)
+	// News Jobs (Default every 15 mins or from config)
 	if newsProcessor != nil {
-		sched.AddJob("News-Fetch", "*/15 * * * *", func() {
+		sched.AddJob("News-Fetch", cfg.NewsFetchCron, func() {
 			newsProcessor.Run()
 		})
 	}

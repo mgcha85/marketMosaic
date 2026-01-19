@@ -140,7 +140,9 @@
                             Active
                         </div>
                         <div class="stat-desc">Real-time Ingestion</div>
-                        <div class="stat-desc">Updates every 15m</div>
+                        <div class="stat-desc">
+                            Cron: {config.news_fetch_cron || "Every 15m"}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -201,12 +203,15 @@
 
                     <div class="form-control w-full">
                         <label class="label"
-                            ><span class="label-text">NewsAPI Key</span></label
+                            ><span class="label-text"
+                                >News Fetch Schedule (Cron)</span
+                            ></label
                         >
                         <input
                             type="text"
-                            bind:value={config.newsapi_key}
+                            bind:value={config.news_fetch_cron}
                             class="input input-bordered w-full font-mono text-sm"
+                            placeholder="*/15 * * * * or @hourly"
                         />
                     </div>
                     <div class="hidden md:block"></div>
