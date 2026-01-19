@@ -189,19 +189,6 @@ func main() {
 		sched.AddJob("DART-UpdateCorpCodes", "@weekly", dartJobs.UpdateCorpCodes)
 	}
 
-	// Candle Jobs (US Market)
-	// US Market closes at 06:00 KST (approx). Schedule ingestion after close.
-	if candleSvc != nil {
-		// Daily ingestion at 06:00 KST
-		sched.AddJob("Candle-Ingest-US-1d", "0 6 * * 2-6", func() {
-			candleSvc.Run(candles.IngestParams{Market: "US", Timeframe: "1d"})
-		})
-		// Minute ingestion at 06:10 KST
-		sched.AddJob("Candle-Ingest-US-1m", "10 6 * * 2-6", func() {
-			candleSvc.Run(candles.IngestParams{Market: "US", Timeframe: "1m"})
-		})
-	}
-
 	// Judal Jobs (Themes)
 	// Daily crawl at 00:00 KST
 	if judalDB.DB != nil {

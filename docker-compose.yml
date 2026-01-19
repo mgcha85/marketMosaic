@@ -7,6 +7,10 @@ services:
       - "7700:7700"
     environment:
       - MEILI_MASTER_KEY=${MEILI_API_KEY:-masterKey}
+      # Optimization for Micro Instance (assuming 1GB RAM)
+      - MEILI_MAX_INDEXING_MEMORY=300Mb
+      - MEILI_MAX_INDEXING_THREADS=1
+      - MEILI_NO_ANALYTICS=true
     volumes:
       - meili_data:/meili_data
     restart: unless-stopped
@@ -35,6 +39,8 @@ services:
       - STORAGE_DIR=/app/storage
       - MEILI_HOST=http://meilisearch:7700
       - TZ=Asia/Seoul
+      # Go Runtime Memory Limit (Soft limit for GC)
+      - GOMEMLIMIT=300MiB
     volumes:
       - ./backend/data:/app/data
       - ./backend/storage:/app/storage
