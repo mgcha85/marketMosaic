@@ -1,0 +1,45 @@
+- main [ref=e3]:
+  - generic [ref=e4]:
+    - generic [ref=e6]:
+      - generic [ref=e7]:
+        - paragraph [ref=e8]: MarketMosaic / Overnight
+        - heading "Tauri 기반 Overnight 전략 워크스페이스" [level=1] [ref=e9]
+        - paragraph [ref=e10]: Judal snapshot, Meilisearch 뉴스, Rust scoring, Tauri desktop workflow를 하나의 로컬 앱으로 통합합니다.
+      - generic [ref=e11]:
+        - generic [ref=e12]: ok
+        - generic [ref=e13]: v0.1.0-demo
+    - generic [ref=e14]:
+      - complementary [ref=e15]:
+        - generic [ref=e17]:
+          - heading "신호 생성" [level=2] [ref=e18]
+          - generic [ref=e19]
+          - generic [ref=e21]
+          - button "신호 생성" [ref=e24] [cursor=pointer]
+        - generic [ref=e26]:
+          - heading "백테스트 실행" [level=2] [ref=e27]
+          - generic [ref=e28]
+          - generic [ref=e30]
+          - button "백테스트 실행" [ref=e32] [cursor=pointer]
+          - generic [ref=e33]: 백테스트 입력 날짜도 Judal 가격 히스토리 기준입니다. 뉴스는 각 날짜 기준 최근 3일 + 당일 15:00 이전 기사만 반영합니다.
+        - generic [ref=e35]:
+          - heading "로컬 경로" [level=2] [ref=e36]
+          - generic [ref=e37]
+      - generic [ref=e44]:
+        - generic [ref=e45]:
+          - generic [ref=e46]
+          - generic [ref=e49]
+          - generic [ref=e52]
+          - generic [ref=e55]
+        - generic [ref=e59]:
+          - generic [ref=e60]
+          - generic [ref=e63]
+        - generic [ref=e67]:
+          - generic [ref=e69]
+          - generic [ref=e170]
+        - generic [ref=e329]:
+          - generic [ref=e330]
+          - generic [ref=e333]
+        - generic [ref=e344]:
+          - heading "거래 내역" [level=3] [ref=e345]
+          - generic [ref=e346]
+          - table [ref=e363]

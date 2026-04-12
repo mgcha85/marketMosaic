@@ -125,22 +125,7 @@ func (c *Client) FetchCandles(symbol, timeframe string, lastTS int64) ([]model.C
 
 	respBody, _, err := c.DoRequest("POST", path, headers, body)
 	if err != nil {
-		log.Printf("Kiwoom Candle API failed for %s (using mock): %v", symbol, err)
-		// Mock data for verification
-		now := time.Now().Unix()
-		return []model.Candle{
-			{
-				Market:    model.MarketKR,
-				Symbol:    symbol,
-				Timeframe: timeframe,
-				TS:        now - 86400,
-				Open:      70000,
-				High:      71000,
-				Low:       69000,
-				Close:     70500,
-				Volume:    1000000,
-			},
-		}, nil
+		return nil, fmt.Errorf("failed to fetch candles from Kiwoom: %w", err)
 	}
 
 	// User spec response structure

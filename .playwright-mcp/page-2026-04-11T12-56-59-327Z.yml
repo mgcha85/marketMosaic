@@ -1,0 +1,738 @@
+- main [ref=e3]:
+  - generic [ref=e4]:
+    - generic [ref=e6]:
+      - generic [ref=e7]:
+        - paragraph [ref=e8]: MarketMosaic / Overnight
+        - heading "Tauri 기반 Overnight 전략 워크스페이스" [level=1] [ref=e9]
+        - paragraph [ref=e10]: Judal snapshot, Meilisearch 뉴스, Rust scoring, Tauri desktop workflow를 하나의 로컬 앱으로 통합합니다.
+      - generic [ref=e11]:
+        - generic [ref=e12]: ok
+        - generic [ref=e13]: v0.1.0-demo
+    - generic [ref=e14]:
+      - complementary [ref=e15]:
+        - generic [ref=e17]:
+          - heading "신호 생성" [level=2] [ref=e18]
+          - generic [ref=e19]:
+            - text: 기준 날짜
+            - 'combobox "기준 날짜 Judal `stock_history` 기준으로 가능한 날짜를 보여줍니다." [ref=e20]':
+              - option "2026-04-11" [selected]
+              - option "2026-04-06"
+              - option "2026-04-03"
+              - option "2026-03-28"
+              - option "2026-03-26"
+              - option "2026-03-25"
+              - option "2026-03-24"
+              - option "2026-03-21"
+              - option "2026-01-13"
+              - option "2026-01-12"
+              - option "2026-01-09"
+              - option "2026-01-06"
+            - text: "Judal `stock_history` 기준으로 가능한 날짜를 보여줍니다."
+          - generic [ref=e21]:
+            - text: 최소 점수
+            - slider "최소 점수 8.0점 이상" [ref=e22] [cursor=pointer]: "8"
+            - generic [ref=e23]: 8.0점 이상
+          - button "신호 생성" [ref=e24] [cursor=pointer]
+        - generic [ref=e26]:
+          - heading "백테스트 실행" [level=2] [ref=e27]
+          - generic [ref=e28]:
+            - text: 시작 날짜
+            - combobox "시작 날짜" [ref=e29]:
+              - option "2026-04-11"
+              - option "2026-04-06"
+              - option "2026-04-03"
+              - option "2026-03-28"
+              - option "2026-03-26"
+              - option "2026-03-25"
+              - option "2026-03-24"
+              - option "2026-03-21"
+              - option "2026-01-13"
+              - option "2026-01-12"
+              - option "2026-01-09"
+              - option "2026-01-06" [selected]
+          - generic [ref=e30]:
+            - text: 종료 날짜
+            - combobox "종료 날짜" [ref=e31]:
+              - option "2026-04-11" [selected]
+              - option "2026-04-06"
+              - option "2026-04-03"
+              - option "2026-03-28"
+              - option "2026-03-26"
+              - option "2026-03-25"
+              - option "2026-03-24"
+              - option "2026-03-21"
+              - option "2026-01-13"
+              - option "2026-01-12"
+              - option "2026-01-09"
+              - option "2026-01-06"
+          - button "백테스트 실행" [ref=e32] [cursor=pointer]
+          - generic [ref=e33]: 백테스트 입력 날짜도 Judal 가격 히스토리 기준입니다. 뉴스는 각 날짜 기준 최근 3일 + 당일 15:00 이전 기사만 반영합니다.
+        - generic [ref=e35]:
+          - heading "로컬 경로" [level=2] [ref=e36]
+          - generic [ref=e37]:
+            - generic [ref=e38]:
+              - generic [ref=e39]: overnight.db
+              - generic [ref=e40]: browser-demo://overnight/overnight.db
+            - generic [ref=e41]:
+              - generic [ref=e42]: judal.db
+              - generic [ref=e43]: browser-demo://marketMosaic/judal.db
+      - generic [ref=e44]:
+        - generic [ref=e45]:
+          - generic [ref=e46]:
+            - generic [ref=e47]: 백테스트 실행 수
+            - generic [ref=e48]: "5"
+          - generic [ref=e49]:
+            - generic [ref=e50]: 총 거래
+            - generic [ref=e51]: "14"
+          - generic [ref=e52]:
+            - generic [ref=e53]: 평균 승률
+            - generic [ref=e54]: 61.7%
+          - generic [ref=e55]:
+            - generic [ref=e56]: 평균 수익률
+            - generic [ref=e57]: 1.26%
+        - generic [ref=e59]:
+          - generic [ref=e60]:
+            - heading "백테스트 실행 선택" [level=3] [ref=e61]
+            - generic [ref=e62]: 전체 5회 집계
+          - generic [ref=e63]:
+            - generic [ref=e64]:
+              - text: 표시할 실행
+              - combobox "표시할 실행" [ref=e65]:
+                - 'option "Run #17 · 2026-03-21 ~ 2026-04-11 · 3건 · +4.45%" [selected]'
+                - 'option "Run #16 · 2026-03-24 ~ 2026-04-10 · 4건 · +8.48%"'
+                - 'option "Run #15 · 2026-03-21 ~ 2026-04-06 · 2건 · +1.68%"'
+                - 'option "Run #14 · 2026-03-21 ~ 2026-03-28 · 3건 · +3.60%"'
+                - 'option "Run #13 · 2026-03-21 ~ 2026-03-21 · 2건 · +1.34%"'
+            - generic [ref=e66]: 상단 숫자는 모든 백테스트 실행의 누적 통계이고, 아래 거래표는 선택한 실행 1건의 거래만 보여줍니다.
+        - generic [ref=e68]:
+          - generic [ref=e69]:
+            - heading "매매일지 분석 흐름" [level=3] [ref=e70]
+            - generic [ref=e71]: "Run #17"
+          - generic [ref=e72]:
+            - generic [ref=e73]:
+              - text: 분석할 매매일
+              - combobox "분석할 매매일" [ref=e74]:
+                - option "2026-04-10"
+                - option "2026-04-09" [selected]
+            - generic [ref=e75]: 선택한 run 안에서 특정 매매일을 고르면, 그날 평가된 후보들의 통과/탈락과 이유를 확인하고, 이어서 개별 종목 증거를 drilldown 할 수 있습니다.
+        - generic [ref=e77]:
+          - generic [ref=e78]:
+            - heading "그날 강했던 테마" [level=3] [ref=e79]
+            - generic [ref=e80]: 5개 섹션
+          - generic [ref=e81]:
+            - generic [ref=e82]:
+              - generic [ref=e83]:
+                - generic [ref=e84]:
+                  - generic [ref=e85]: 반도체
+                  - generic [ref=e86]: 후보 1개 · 통과 1개
+                - generic [ref=e87]: 평균 9.2
+              - generic [ref=e88]: "대표 종목: 삼성전자"
+              - generic [ref=e89]: 상승 종목 6/8
+            - generic [ref=e90]:
+              - generic [ref=e91]:
+                - generic [ref=e92]:
+                  - generic [ref=e93]: 방산
+                  - generic [ref=e94]: 후보 1개 · 통과 1개
+                - generic [ref=e95]: 평균 8.7
+              - generic [ref=e96]: "대표 종목: 한화에어로스페이스"
+              - generic [ref=e97]: 상승 종목 4/5
+            - generic [ref=e98]:
+              - generic [ref=e99]:
+                - generic [ref=e100]:
+                  - generic [ref=e101]: 반도체 장비
+                  - generic [ref=e102]: 후보 1개 · 통과 1개
+                - generic [ref=e103]: 평균 8.1
+              - generic [ref=e104]: "대표 종목: 한미반도체"
+              - generic [ref=e105]: 상승 종목 6/8
+            - generic [ref=e106]:
+              - generic [ref=e107]:
+                - generic [ref=e108]:
+                  - generic [ref=e109]: AI 플랫폼
+                  - generic [ref=e110]: 후보 1개 · 통과 0개
+                - generic [ref=e111]: 평균 7.4
+              - generic [ref=e112]: "대표 종목: NAVER"
+              - generic [ref=e113]: 상승 종목 2/4
+            - generic [ref=e114]:
+              - generic [ref=e115]:
+                - generic [ref=e116]:
+                  - generic [ref=e117]: 게임
+                  - generic [ref=e118]: 후보 1개 · 통과 0개
+                - generic [ref=e119]: 평균 6.8
+              - generic [ref=e120]: "대표 종목: 넷마블"
+              - generic [ref=e121]: 상승 종목 1/5
+        - generic [ref=e122]:
+          - generic [ref=e123]:
+            - generic [ref=e124]: 검토 일자
+            - generic [ref=e125]: 2026-04-09
+          - generic [ref=e126]:
+            - generic [ref=e127]: 실매매 수
+            - generic [ref=e128]: "1"
+          - generic [ref=e129]:
+            - generic [ref=e130]: 점수 통과
+            - generic [ref=e131]: "3"
+          - generic [ref=e132]:
+            - generic [ref=e133]: 점수 탈락
+            - generic [ref=e134]: "2"
+        - generic [ref=e135]:
+          - generic [ref=e137]:
+            - generic [ref=e138]:
+              - heading "신호 생성 / 데일리 후보" [level=2] [ref=e139]
+              - generic [ref=e140]: 3개
+            - generic [ref=e142]:
+              - generic [ref=e143]:
+                - heading "일자별 후보 요약" [level=3] [ref=e144]
+                - generic [ref=e145]: 3개 후보
+              - table [ref=e147]:
+                - rowgroup [ref=e148]:
+                  - row "종목 테마 총점 Judal 뉴스 캔들/차트 리스크 핵심 의견" [ref=e149]:
+                    - columnheader "종목" [ref=e150]
+                    - columnheader "테마" [ref=e151]
+                    - columnheader "총점" [ref=e152]
+                    - columnheader "Judal" [ref=e153]
+                    - columnheader "뉴스" [ref=e154]
+                    - columnheader "캔들/차트" [ref=e155]
+                    - columnheader "리스크" [ref=e156]
+                    - columnheader "핵심 의견" [ref=e157]
+                - rowgroup [ref=e158]:
+                  - row "삼성전자 005930 반도체 9.2 1.9 2.6 2.7 2.0 테마 강도와 뉴스 모멘텀이 균형 있게 높고, 종가가 VWAP 위에서 마감해 단기 수급 지속 가능성을 높게 평가했습니다." [ref=e159] [cursor=pointer]:
+                    - cell "삼성전자 005930" [ref=e160]:
+                      - generic [ref=e161]: 삼성전자
+                      - generic [ref=e162]: "005930"
+                    - cell "반도체" [ref=e163]
+                    - cell "9.2" [ref=e164]:
+                      - generic [ref=e165]: "9.2"
+                    - cell "1.9" [ref=e166]
+                    - cell "2.6" [ref=e167]
+                    - cell "2.7" [ref=e168]
+                    - cell "2.0" [ref=e169]
+                    - cell "테마 강도와 뉴스 모멘텀이 균형 있게 높고, 종가가 VWAP 위에서 마감해 단기 수급 지속 가능성을 높게 평가했습니다." [ref=e170]
+                  - row "한화에어로스페이스 012450 방산 8.7 1.8 2.4 2.5 2.0 정책·수주 뉴스가 집중된 가운데 거래량과 체결 건수가 함께 튀어 단기 추세 연장 확률이 높다고 판단했습니다." [ref=e171] [cursor=pointer]:
+                    - cell "한화에어로스페이스 012450" [ref=e172]:
+                      - generic [ref=e173]: 한화에어로스페이스
+                      - generic [ref=e174]: "012450"
+                    - cell "방산" [ref=e175]
+                    - cell "8.7" [ref=e176]:
+                      - generic [ref=e177]: "8.7"
+                    - cell "1.8" [ref=e178]
+                    - cell "2.4" [ref=e179]
+                    - cell "2.5" [ref=e180]
+                    - cell "2.0" [ref=e181]
+                    - cell "정책·수주 뉴스가 집중된 가운데 거래량과 체결 건수가 함께 튀어 단기 추세 연장 확률이 높다고 판단했습니다." [ref=e182]
+                  - row "한미반도체 042700 반도체 장비 8.1 1.8 1.9 2.4 2.0 기술적 흐름은 안정적이지만 과열 리스크가 있어 상위 후보보다는 보조 후보로 두는 편이 적절합니다." [ref=e183] [cursor=pointer]:
+                    - cell "한미반도체 042700" [ref=e184]:
+                      - generic [ref=e185]: 한미반도체
+                      - generic [ref=e186]: "042700"
+                    - cell "반도체 장비" [ref=e187]
+                    - cell "8.1" [ref=e188]:
+                      - generic [ref=e189]: "8.1"
+                    - cell "1.8" [ref=e190]
+                    - cell "1.9" [ref=e191]
+                    - cell "2.4" [ref=e192]
+                    - cell "2.0" [ref=e193]
+                    - cell "기술적 흐름은 안정적이지만 과열 리스크가 있어 상위 후보보다는 보조 후보로 두는 편이 적절합니다." [ref=e194]
+            - generic [ref=e195]:
+              - 'button "삼성전자 005930 · 반도체 9.2점 반도체 업종 강세와 정책 기대감이 동시에 반영됐고, 뉴스 흐름도 우호적이어서 overnight 후보로 우선 노출했습니다. 핵심 포인트: AI 메모리 투자 확대 주의: 단기 급등 이후 차익실현 가능성 뉴스 4건 등락률 3.18% 5일선 지지" [ref=e196] [cursor=pointer]':
+                - generic [ref=e197]:
+                  - generic [ref=e198]:
+                    - generic [ref=e199]:
+                      - heading "삼성전자" [level=3] [ref=e200]
+                      - paragraph [ref=e201]: 005930 · 반도체
+                    - generic [ref=e202]: 9.2점
+                  - paragraph [ref=e203]: 반도체 업종 강세와 정책 기대감이 동시에 반영됐고, 뉴스 흐름도 우호적이어서 overnight 후보로 우선 노출했습니다.
+                  - generic [ref=e204]: "핵심 포인트: AI 메모리 투자 확대"
+                  - generic [ref=e205]: "주의: 단기 급등 이후 차익실현 가능성"
+                  - generic [ref=e206]:
+                    - generic [ref=e207]: 뉴스 4건
+                    - generic [ref=e208]: 등락률 3.18%
+                    - generic [ref=e209]: 5일선 지지
+              - 'button "한화에어로스페이스 012450 · 방산 8.7점 방산 수주 뉴스가 이어졌고 거래량 스파이크가 확인돼 다음 날 갭업 가능성이 높은 후보로 분류했습니다. 핵심 포인트: 대형 수출 계약 기대 주의: 변동성 확대로 시초가 과열 가능성 뉴스 3건 등락률 2.41% 5일선 지지" [ref=e210] [cursor=pointer]':
+                - generic [ref=e211]:
+                  - generic [ref=e212]:
+                    - generic [ref=e213]:
+                      - heading "한화에어로스페이스" [level=3] [ref=e214]
+                      - paragraph [ref=e215]: 012450 · 방산
+                    - generic [ref=e216]: 8.7점
+                  - paragraph [ref=e217]: 방산 수주 뉴스가 이어졌고 거래량 스파이크가 확인돼 다음 날 갭업 가능성이 높은 후보로 분류했습니다.
+                  - generic [ref=e218]: "핵심 포인트: 대형 수출 계약 기대"
+                  - generic [ref=e219]: "주의: 변동성 확대로 시초가 과열 가능성"
+                  - generic [ref=e220]:
+                    - generic [ref=e221]: 뉴스 3건
+                    - generic [ref=e222]: 등락률 2.41%
+                    - generic [ref=e223]: 5일선 지지
+              - 'button "한미반도체 042700 · 반도체 장비 8.1점 장비주 순환매와 positive body 신호는 좋지만 단기 과열 구간이라 보수적으로 낮은 우선순위를 부여했습니다. 핵심 포인트: HBM 장비 수혜 기대 주의: 단기 과열 감점 적용 뉴스 2건 등락률 1.12% 5일선 지지" [ref=e224] [cursor=pointer]':
+                - generic [ref=e225]:
+                  - generic [ref=e226]:
+                    - generic [ref=e227]:
+                      - heading "한미반도체" [level=3] [ref=e228]
+                      - paragraph [ref=e229]: 042700 · 반도체 장비
+                    - generic [ref=e230]: 8.1점
+                  - paragraph [ref=e231]: 장비주 순환매와 positive body 신호는 좋지만 단기 과열 구간이라 보수적으로 낮은 우선순위를 부여했습니다.
+                  - generic [ref=e232]: "핵심 포인트: HBM 장비 수혜 기대"
+                  - generic [ref=e233]: "주의: 단기 과열 감점 적용"
+                  - generic [ref=e234]:
+                    - generic [ref=e235]: 뉴스 2건
+                    - generic [ref=e236]: 등락률 1.12%
+                    - generic [ref=e237]: 5일선 지지
+          - generic [ref=e238]:
+            - generic [ref=e240]:
+              - generic [ref=e241]:
+                - heading "백테스트 일자 판정" [level=3] [ref=e242]
+                - generic [ref=e243]: 기준점수 8.0
+              - generic [ref=e245]:
+                - generic [ref=e246]:
+                  - heading "일자별 후보 판정표" [level=3] [ref=e247]
+                  - generic [ref=e248]: 5개 후보
+                - table [ref=e250]:
+                  - rowgroup [ref=e251]:
+                    - row "상태 종목 테마 총점 Judal 뉴스 차트 리스크 판정 이유" [ref=e252]:
+                      - columnheader "상태" [ref=e253]
+                      - columnheader "종목" [ref=e254]
+                      - columnheader "테마" [ref=e255]
+                      - columnheader "총점" [ref=e256]
+                      - columnheader "Judal" [ref=e257]
+                      - columnheader "뉴스" [ref=e258]
+                      - columnheader "차트" [ref=e259]
+                      - columnheader "리스크" [ref=e260]
+                      - columnheader "판정 이유" [ref=e261]
+                  - rowgroup [ref=e262]:
+                    - 'row "실매매 삼성전자 005930 반도체 9.2 1.9 2.6 2.7 2.0 테마 강도와 뉴스 모멘텀이 균형 있게 높고, 종가가 VWAP 위에서 마감해 단기 수급 지속 가능성을 높게 평가했습니다. 결과: +2.70%" [ref=e263] [cursor=pointer]':
+                      - cell "실매매" [ref=e264]:
+                        - generic [ref=e265]: 실매매
+                      - cell "삼성전자 005930" [ref=e266]:
+                        - generic [ref=e267]: 삼성전자
+                        - generic [ref=e268]: "005930"
+                      - cell "반도체" [ref=e269]
+                      - cell "9.2" [ref=e270]
+                      - cell "1.9" [ref=e271]
+                      - cell "2.6" [ref=e272]
+                      - cell "2.7" [ref=e273]
+                      - cell "2.0" [ref=e274]
+                      - 'cell "테마 강도와 뉴스 모멘텀이 균형 있게 높고, 종가가 VWAP 위에서 마감해 단기 수급 지속 가능성을 높게 평가했습니다. 결과: +2.70%" [ref=e275]':
+                        - generic [ref=e276]: 테마 강도와 뉴스 모멘텀이 균형 있게 높고, 종가가 VWAP 위에서 마감해 단기 수급 지속 가능성을 높게 평가했습니다.
+                        - generic [ref=e277]: "결과: +2.70%"
+                    - row "통과 한화에어로스페이스 012450 방산 8.7 1.8 2.4 2.5 2.0 정책·수주 뉴스가 집중된 가운데 거래량과 체결 건수가 함께 튀어 단기 추세 연장 확률이 높다고 판단했습니다." [ref=e278] [cursor=pointer]:
+                      - cell "통과" [ref=e279]:
+                        - generic [ref=e280]: 통과
+                      - cell "한화에어로스페이스 012450" [ref=e281]:
+                        - generic [ref=e282]: 한화에어로스페이스
+                        - generic [ref=e283]: "012450"
+                      - cell "방산" [ref=e284]
+                      - cell "8.7" [ref=e285]
+                      - cell "1.8" [ref=e286]
+                      - cell "2.4" [ref=e287]
+                      - cell "2.5" [ref=e288]
+                      - cell "2.0" [ref=e289]
+                      - cell "정책·수주 뉴스가 집중된 가운데 거래량과 체결 건수가 함께 튀어 단기 추세 연장 확률이 높다고 판단했습니다." [ref=e290]:
+                        - generic [ref=e291]: 정책·수주 뉴스가 집중된 가운데 거래량과 체결 건수가 함께 튀어 단기 추세 연장 확률이 높다고 판단했습니다.
+                    - row "통과 한미반도체 042700 반도체 장비 8.1 1.8 1.9 2.4 2.0 기술적 흐름은 안정적이지만 과열 리스크가 있어 상위 후보보다는 보조 후보로 두는 편이 적절합니다." [ref=e292] [cursor=pointer]:
+                      - cell "통과" [ref=e293]:
+                        - generic [ref=e294]: 통과
+                      - cell "한미반도체 042700" [ref=e295]:
+                        - generic [ref=e296]: 한미반도체
+                        - generic [ref=e297]: "042700"
+                      - cell "반도체 장비" [ref=e298]
+                      - cell "8.1" [ref=e299]
+                      - cell "1.8" [ref=e300]
+                      - cell "1.9" [ref=e301]
+                      - cell "2.4" [ref=e302]
+                      - cell "2.0" [ref=e303]
+                      - cell "기술적 흐름은 안정적이지만 과열 리스크가 있어 상위 후보보다는 보조 후보로 두는 편이 적절합니다." [ref=e304]:
+                        - generic [ref=e305]: 기술적 흐름은 안정적이지만 과열 리스크가 있어 상위 후보보다는 보조 후보로 두는 편이 적절합니다.
+                    - 'row "탈락 NAVER 035420 AI 플랫폼 7.4 1.4 1.8 2.0 2.2 총점 7.4점으로 기준 8.0점 미달 차트 판단: 현재가가 MA5 아래" [ref=e306] [cursor=pointer]':
+                      - cell "탈락" [ref=e307]:
+                        - generic [ref=e308]: 탈락
+                      - cell "NAVER 035420" [ref=e309]:
+                        - generic [ref=e310]: NAVER
+                        - generic [ref=e311]: "035420"
+                      - cell "AI 플랫폼" [ref=e312]
+                      - cell "7.4" [ref=e313]
+                      - cell "1.4" [ref=e314]
+                      - cell "1.8" [ref=e315]
+                      - cell "2.0" [ref=e316]
+                      - cell "2.2" [ref=e317]
+                      - 'cell "총점 7.4점으로 기준 8.0점 미달 차트 판단: 현재가가 MA5 아래" [ref=e318]':
+                        - generic [ref=e319]: 총점 7.4점으로 기준 8.0점 미달
+                        - generic [ref=e320]: "차트 판단: 현재가가 MA5 아래"
+                    - row "탈락 넷마블 251270 게임 6.8 1.0 1.2 1.8 2.8 총점 6.8점으로 기준 8.0점 미달 Judal 주도 테마가 아님" [ref=e321] [cursor=pointer]:
+                      - cell "탈락" [ref=e322]:
+                        - generic [ref=e323]: 탈락
+                      - cell "넷마블 251270" [ref=e324]:
+                        - generic [ref=e325]: 넷마블
+                        - generic [ref=e326]: "251270"
+                      - cell "게임" [ref=e327]
+                      - cell "6.8" [ref=e328]
+                      - cell "1.0" [ref=e329]
+                      - cell "1.2" [ref=e330]
+                      - cell "1.8" [ref=e331]
+                      - cell "2.8" [ref=e332]
+                      - cell "총점 6.8점으로 기준 8.0점 미달 Judal 주도 테마가 아님" [ref=e333]:
+                        - generic [ref=e334]: 총점 6.8점으로 기준 8.0점 미달
+                        - generic [ref=e335]: Judal 주도 테마가 아님
+            - generic [ref=e337]:
+              - generic [ref=e338]:
+                - heading "선택한 후보 요약" [level=3] [ref=e339]
+                - generic [ref=e340]: 실매매
+              - generic [ref=e341]:
+                - generic [ref=e342]: "종목: 삼성전자 (005930)"
+                - generic [ref=e343]: "테마: 반도체"
+                - generic [ref=e344]: "매매일: 2026-04-09"
+            - generic [ref=e346]:
+              - heading "점수 분해" [level=3] [ref=e347]
+              - generic [ref=e348]:
+                - generic [ref=e349]:
+                  - generic [ref=e350]:
+                    - generic [ref=e351]: 테마
+                    - generic [ref=e352]: 1.9 / 2
+                  - progressbar [ref=e353]
+                - generic [ref=e354]:
+                  - generic [ref=e355]:
+                    - generic [ref=e356]: 뉴스
+                    - generic [ref=e357]: 2.6 / 3
+                  - progressbar [ref=e358]
+                - generic [ref=e359]:
+                  - generic [ref=e360]:
+                    - generic [ref=e361]: 기술적
+                    - generic [ref=e362]: 2.7 / 3
+                  - progressbar [ref=e363]
+                - generic [ref=e364]:
+                  - generic [ref=e365]:
+                    - generic [ref=e366]: 리스크
+                    - generic [ref=e367]: 2.0 / 2
+                  - progressbar [ref=e368]
+              - generic [ref=e369]:
+                - generic [ref=e370]:
+                  - generic [ref=e371]: 테마 근거
+                  - list [ref=e372]:
+                    - listitem [ref=e373]: 반도체 테마 강도가 높고 상위 랭크를 유지했습니다.
+                - generic [ref=e374]:
+                  - generic [ref=e375]: 뉴스 근거
+                  - list [ref=e376]:
+                    - listitem [ref=e377]: 정책/수출 관련 우호 뉴스가 3일 내 집중됐습니다.
+                - generic [ref=e378]:
+                  - generic [ref=e379]: 기술적 근거
+                  - list [ref=e380]:
+                    - listitem [ref=e381]: 종가가 VWAP 위에서 마감했고 거래량이 평균 대비 증가했습니다.
+                - generic [ref=e382]:
+                  - generic [ref=e383]: 리스크 근거
+                  - list [ref=e384]:
+                    - listitem [ref=e385]: 과열 아닌 안정 구간으로 평가했습니다.
+            - generic [ref=e387]:
+              - generic [ref=e388]:
+                - heading "전략 체크포인트" [level=3] [ref=e389]
+                - generic [ref=e390]: 제공된 strategy 기준
+              - generic [ref=e391]:
+                - generic [ref=e392]:
+                  - generic [ref=e393]:
+                    - generic [ref=e394]:
+                      - generic [ref=e395]: A급 점수 기준
+                      - generic [ref=e396]: 전략 3·5
+                    - generic [ref=e397]: 통과
+                  - paragraph [ref=e398]: 총점 9.2 / 10
+                - generic [ref=e399]:
+                  - generic [ref=e400]:
+                    - generic [ref=e401]:
+                      - generic [ref=e402]: Judal 주도 테마
+                      - generic [ref=e403]: 전략 1·3·6
+                    - generic [ref=e404]: 통과
+                  - paragraph [ref=e405]: 반도체 테마 강도가 높고 상위 랭크를 유지했습니다.
+                - generic [ref=e406]:
+                  - generic [ref=e407]:
+                    - generic [ref=e408]:
+                      - generic [ref=e409]: 재료 명분 확보
+                      - generic [ref=e410]: 전략 3·5·6
+                    - generic [ref=e411]: 통과
+                  - paragraph [ref=e412]: AI 메모리 투자 확대
+                - generic [ref=e413]:
+                  - generic [ref=e414]:
+                    - generic [ref=e415]:
+                      - generic [ref=e416]: 지지·방어 확인
+                      - generic [ref=e417]: 전략 2·4
+                    - generic [ref=e418]: 통과
+                  - paragraph [ref=e419]: 종가가 VWAP 위에서 마감했고 거래량이 평균 대비 증가했습니다.
+                - generic [ref=e420]:
+                  - generic [ref=e421]:
+                    - generic [ref=e422]:
+                      - generic [ref=e423]: 과열 리스크 점검
+                      - generic [ref=e424]: 전략 1·5
+                    - generic [ref=e425]: 통과
+                  - paragraph [ref=e426]: 과열 아닌 안정 구간으로 평가했습니다.
+                - generic [ref=e427]:
+                  - generic [ref=e428]:
+                    - generic [ref=e429]:
+                      - generic [ref=e430]: 종합 의견 정리
+                      - generic [ref=e431]: 전략 전체 요약
+                    - generic [ref=e432]: 통과
+                  - paragraph [ref=e433]: 테마 강도와 뉴스 모멘텀이 균형 있게 높고, 종가가 VWAP 위에서 마감해 단기 수급 지속 가능성을 높게 평가했습니다.
+            - generic [ref=e435]:
+              - heading "점수 분해" [level=3] [ref=e436]
+              - generic [ref=e437]:
+                - generic [ref=e438]:
+                  - generic [ref=e439]:
+                    - generic [ref=e440]: 테마
+                    - generic [ref=e441]: 1.9 / 2
+                  - progressbar [ref=e442]
+                - generic [ref=e443]:
+                  - generic [ref=e444]:
+                    - generic [ref=e445]: 뉴스
+                    - generic [ref=e446]: 2.6 / 3
+                  - progressbar [ref=e447]
+                - generic [ref=e448]:
+                  - generic [ref=e449]:
+                    - generic [ref=e450]: 기술적
+                    - generic [ref=e451]: 2.7 / 3
+                  - progressbar [ref=e452]
+                - generic [ref=e453]:
+                  - generic [ref=e454]:
+                    - generic [ref=e455]: 리스크
+                    - generic [ref=e456]: 2.0 / 2
+                  - progressbar [ref=e457]
+              - generic [ref=e458]:
+                - generic [ref=e459]:
+                  - generic [ref=e460]: 테마 근거
+                  - list [ref=e461]:
+                    - listitem [ref=e462]: 반도체 테마 강도가 높고 상위 랭크를 유지했습니다.
+                - generic [ref=e463]:
+                  - generic [ref=e464]: 뉴스 근거
+                  - list [ref=e465]:
+                    - listitem [ref=e466]: 정책/수출 관련 우호 뉴스가 3일 내 집중됐습니다.
+                - generic [ref=e467]:
+                  - generic [ref=e468]: 기술적 근거
+                  - list [ref=e469]:
+                    - listitem [ref=e470]: 종가가 VWAP 위에서 마감했고 거래량이 평균 대비 증가했습니다.
+                - generic [ref=e471]:
+                  - generic [ref=e472]: 리스크 근거
+                  - list [ref=e473]:
+                    - listitem [ref=e474]: 과열 아닌 안정 구간으로 평가했습니다.
+            - generic [ref=e476]:
+              - generic [ref=e477]:
+                - heading "전략 체크포인트" [level=3] [ref=e478]
+                - generic [ref=e479]: 제공된 strategy 기준
+              - generic [ref=e480]:
+                - generic [ref=e481]:
+                  - generic [ref=e482]:
+                    - generic [ref=e483]:
+                      - generic [ref=e484]: A급 점수 기준
+                      - generic [ref=e485]: 전략 3·5
+                    - generic [ref=e486]: 통과
+                  - paragraph [ref=e487]: 총점 9.2 / 10
+                - generic [ref=e488]:
+                  - generic [ref=e489]:
+                    - generic [ref=e490]:
+                      - generic [ref=e491]: Judal 주도 테마
+                      - generic [ref=e492]: 전략 1·3·6
+                    - generic [ref=e493]: 통과
+                  - paragraph [ref=e494]: 반도체 테마 강도가 높고 상위 랭크를 유지했습니다.
+                - generic [ref=e495]:
+                  - generic [ref=e496]:
+                    - generic [ref=e497]:
+                      - generic [ref=e498]: 재료 명분 확보
+                      - generic [ref=e499]: 전략 3·5·6
+                    - generic [ref=e500]: 통과
+                  - paragraph [ref=e501]: AI 메모리 투자 확대
+                - generic [ref=e502]:
+                  - generic [ref=e503]:
+                    - generic [ref=e504]:
+                      - generic [ref=e505]: 지지·방어 확인
+                      - generic [ref=e506]: 전략 2·4
+                    - generic [ref=e507]: 통과
+                  - paragraph [ref=e508]: 종가가 VWAP 위에서 마감했고 거래량이 평균 대비 증가했습니다.
+                - generic [ref=e509]:
+                  - generic [ref=e510]:
+                    - generic [ref=e511]:
+                      - generic [ref=e512]: 과열 리스크 점검
+                      - generic [ref=e513]: 전략 1·5
+                    - generic [ref=e514]: 통과
+                  - paragraph [ref=e515]: 과열 아닌 안정 구간으로 평가했습니다.
+                - generic [ref=e516]:
+                  - generic [ref=e517]:
+                    - generic [ref=e518]:
+                      - generic [ref=e519]: 종합 의견 정리
+                      - generic [ref=e520]: 전략 전체 요약
+                    - generic [ref=e521]: 통과
+                  - paragraph [ref=e522]: 테마 강도와 뉴스 모멘텀이 균형 있게 높고, 종가가 VWAP 위에서 마감해 단기 수급 지속 가능성을 높게 평가했습니다.
+            - generic [ref=e524]:
+              - heading "선택된 종목 / 종합 의견" [level=3] [ref=e525]
+              - generic [ref=e526]:
+                - generic [ref=e527]: "종목: 삼성전자 (005930)"
+                - generic [ref=e528]: "테마: 반도체"
+                - generic [ref=e529]: "일자: 2026-04-11"
+                - generic [ref=e530]:
+                  - generic [ref=e531]: 종합 의견
+                  - paragraph [ref=e532]: 테마 강도와 뉴스 모멘텀이 균형 있게 높고, 종가가 VWAP 위에서 마감해 단기 수급 지속 가능성을 높게 평가했습니다.
+                - generic [ref=e533]:
+                  - generic [ref=e534]: 대표 뉴스
+                  - list [ref=e535]:
+                    - listitem [ref=e536]: 반도체 수출 회복 기대감에 관련주 동반 강세
+                    - listitem [ref=e537]: AI 메모리 투자 확대, HBM 생태계 수혜 전망
+                - generic [ref=e538]:
+                  - generic [ref=e539]: 핵심 뉴스 포인트
+                  - list [ref=e540]:
+                    - listitem [ref=e541]: AI 메모리 투자 확대
+                    - listitem [ref=e542]: 반도체 수출 회복 기대
+                - generic [ref=e543]:
+                  - generic [ref=e544]: 주의 포인트
+                  - generic [ref=e546]: 단기 급등 이후 차익실현 가능성
+                - generic [ref=e547]:
+                  - generic [ref=e548]: Judal 에서 이 종목을 고른 이유
+                  - list [ref=e549]:
+                    - listitem [ref=e550]: 반도체 테마 강도가 높고 상위 랭크를 유지했습니다.
+                - generic [ref=e551]:
+                  - generic [ref=e552]:
+                    - generic [ref=e553]: 뉴스 점수 근거
+                    - list [ref=e554]:
+                      - listitem [ref=e555]: 정책/수출 관련 우호 뉴스가 3일 내 집중됐습니다.
+                  - generic [ref=e556]:
+                    - generic [ref=e557]: 캔들 / 차트 점수 근거
+                    - list [ref=e558]:
+                      - listitem [ref=e559]: 종가가 VWAP 위에서 마감했고 거래량이 평균 대비 증가했습니다.
+                  - generic [ref=e560]:
+                    - generic [ref=e561]: 리스크 / 보수 판단
+                    - list [ref=e562]:
+                      - listitem [ref=e563]: 과열 아닌 안정 구간으로 평가했습니다.
+                - generic [ref=e564]:
+                  - generic [ref=e565]: 최근 히스토리
+                  - generic [ref=e566]:
+                    - generic [ref=e567]:
+                      - generic [ref=e568]: 2026-04-11
+                      - generic [ref=e569]: 84,200원
+                    - generic [ref=e570]:
+                      - generic [ref=e571]: 2026-04-10
+                      - generic [ref=e572]: 81,600원
+                    - generic [ref=e573]:
+                      - generic [ref=e574]: 2026-04-09
+                      - generic [ref=e575]: 80,500원
+                - generic [ref=e576]:
+                  - generic [ref=e577]: Candle 보조신호
+                  - generic [ref=e578]:
+                    - generic [ref=e579]:
+                      - generic [ref=e580]: 양봉 마감
+                      - generic [ref=e581]: 예
+                    - generic [ref=e582]:
+                      - generic [ref=e583]: VWAP 상회
+                      - generic [ref=e584]: 예
+                    - generic [ref=e585]:
+                      - generic [ref=e586]: 거래량 스파이크
+                      - generic [ref=e587]: 예
+                    - generic [ref=e588]:
+                      - generic [ref=e589]: 체결건수 스파이크
+                      - generic [ref=e590]: 아니오
+            - generic [ref=e592]:
+              - heading "백테스트 후보 상세" [level=3] [ref=e593]
+              - generic [ref=e594]:
+                - generic [ref=e595]: 종합 의견
+                - paragraph [ref=e596]: 테마 강도와 뉴스 모멘텀이 균형 있게 높고, 종가가 VWAP 위에서 마감해 단기 수급 지속 가능성을 높게 평가했습니다.
+              - generic [ref=e597]:
+                - generic [ref=e598]:
+                  - generic [ref=e599]: 뉴스 요약
+                  - list [ref=e600]:
+                    - listitem [ref=e601]: 반도체 수출 회복 기대감에 관련주 동반 강세
+                    - listitem [ref=e602]: AI 메모리 투자 확대, HBM 생태계 수혜 전망
+                - generic [ref=e603]:
+                  - generic [ref=e604]: 캔들 / 차트
+                  - list [ref=e605]:
+                    - listitem [ref=e606]: 종가가 VWAP 위에서 마감했고 거래량이 평균 대비 증가했습니다.
+                - generic [ref=e607]:
+                  - generic [ref=e608]: Judal / 테마 판정
+                  - list [ref=e609]:
+                    - listitem [ref=e610]: 반도체 테마 강도가 높고 상위 랭크를 유지했습니다.
+              - generic [ref=e611]:
+                - generic [ref=e612]: 최근 히스토리
+                - generic [ref=e613]:
+                  - generic [ref=e614]:
+                    - generic [ref=e615]: 2026-04-11
+                    - generic [ref=e616]: 84,200원
+                  - generic [ref=e617]:
+                    - generic [ref=e618]: 2026-04-10
+                    - generic [ref=e619]: 81,600원
+                  - generic [ref=e620]:
+                    - generic [ref=e621]: 2026-04-09
+                    - generic [ref=e622]: 80,500원
+        - generic [ref=e624]:
+          - generic [ref=e625]:
+            - heading "최근 실행 요약" [level=3] [ref=e626]
+            - generic [ref=e627]: "Run #17"
+          - generic [ref=e628]:
+            - generic [ref=e629]:
+              - generic [ref=e630]: 누적 수익률
+              - generic [ref=e631]: +4.45%
+            - generic [ref=e632]:
+              - generic [ref=e633]: 평균 수익률
+              - generic [ref=e634]: 1.48%
+            - generic [ref=e635]:
+              - generic [ref=e636]: 최대 낙폭
+              - generic [ref=e637]: 1.85%
+        - generic [ref=e639]:
+          - heading "거래 내역" [level=3] [ref=e640]
+          - generic [ref=e641]:
+            - generic [ref=e642]:
+              - text: 설명 필터
+              - textbox "설명 필터" [ref=e643]:
+                - /placeholder: 정책, MA5, 과열...
+            - generic [ref=e644]:
+              - text: 최소 점수
+              - textbox "최소 점수" [ref=e645]:
+                - /placeholder: "8.0"
+            - generic [ref=e646]:
+              - text: 테마 필터
+              - textbox "테마 필터" [ref=e647]:
+                - /placeholder: 반도체, 로봇...
+            - generic [ref=e648] [cursor=pointer]:
+              - checkbox "수익 거래만 보기" [ref=e649]
+              - generic [ref=e650]: 수익 거래만 보기
+            - generic [ref=e651] [cursor=pointer]:
+              - checkbox "주의 거래만 보기" [ref=e652]
+              - generic [ref=e653]: 주의 거래만 보기
+            - generic [ref=e654] [cursor=pointer]:
+              - checkbox "candle 강세만 보기" [ref=e655]
+              - generic [ref=e656]: candle 강세만 보기
+          - table [ref=e658]:
+            - rowgroup [ref=e659]:
+              - row "날짜 종목 테마 점수 진입가 청산가 수익률 설명" [ref=e660]:
+                - columnheader "날짜" [ref=e661]
+                - columnheader "종목" [ref=e662]
+                - columnheader "테마" [ref=e663]
+                - columnheader "점수" [ref=e664]
+                - columnheader "진입가" [ref=e665]
+                - columnheader "청산가" [ref=e666]
+                - columnheader "수익률" [ref=e667]
+                - columnheader "설명" [ref=e668]
+            - rowgroup [ref=e669]:
+              - 'row "2026-04-09 삼성전자 005930 반도체 9.2 81,600 83,800 +2.70% 정책 뉴스와 VWAP 상회가 겹친 반도체 대표주 시나리오 뉴스: 정책/수출 관련 우호 뉴스가 3일 내 집중됐습니다." [ref=e670]':
+                - cell "2026-04-09" [ref=e671]
+                - cell "삼성전자 005930" [ref=e672]:
+                  - generic [ref=e673]: 삼성전자
+                  - generic [ref=e674]: "005930"
+                - cell "반도체" [ref=e675]
+                - cell "9.2" [ref=e676]
+                - cell "81,600" [ref=e677]
+                - cell "83,800" [ref=e678]
+                - cell "+2.70%" [ref=e679]
+                - 'cell "정책 뉴스와 VWAP 상회가 겹친 반도체 대표주 시나리오 뉴스: 정책/수출 관련 우호 뉴스가 3일 내 집중됐습니다." [ref=e680]':
+                  - generic [ref=e681]: 정책 뉴스와 VWAP 상회가 겹친 반도체 대표주 시나리오
+                  - generic [ref=e682]: "뉴스: 정책/수출 관련 우호 뉴스가 3일 내 집중됐습니다."
+              - 'row "2026-04-10 한화에어로스페이스 012450 방산 8.7 310,500 320,400 +3.19% 수주 뉴스와 거래량 스파이크가 만든 방산 모멘텀 뉴스: 수출 계약 관련 뉴스가 다수 포착됐습니다." [ref=e683]':
+                - cell "2026-04-10" [ref=e684]
+                - cell "한화에어로스페이스 012450" [ref=e685]:
+                  - generic [ref=e686]: 한화에어로스페이스
+                  - generic [ref=e687]: "012450"
+                - cell "방산" [ref=e688]
+                - cell "8.7" [ref=e689]
+                - cell "310,500" [ref=e690]
+                - cell "320,400" [ref=e691]
+                - cell "+3.19%" [ref=e692]
+                - 'cell "수주 뉴스와 거래량 스파이크가 만든 방산 모멘텀 뉴스: 수출 계약 관련 뉴스가 다수 포착됐습니다." [ref=e693]':
+                  - generic [ref=e694]: 수주 뉴스와 거래량 스파이크가 만든 방산 모멘텀
+                  - generic [ref=e695]: "뉴스: 수출 계약 관련 뉴스가 다수 포착됐습니다."
+              - 'row "2026-04-10 한미반도체 042700 반도체 장비 8.1 125,100 123,300 -1.44% 기술 신호는 좋았지만 단기 과열 구간에서 밀린 사례 뉴스: HBM 관련 기대 뉴스가 유지됐습니다." [ref=e696]':
+                - cell "2026-04-10" [ref=e697]
+                - cell "한미반도체 042700" [ref=e698]:
+                  - generic [ref=e699]: 한미반도체
+                  - generic [ref=e700]: "042700"
+                - cell "반도체 장비" [ref=e701]
+                - cell "8.1" [ref=e702]
+                - cell "125,100" [ref=e703]
+                - cell "123,300" [ref=e704]
+                - cell "-1.44%" [ref=e705]
+                - 'cell "기술 신호는 좋았지만 단기 과열 구간에서 밀린 사례 뉴스: HBM 관련 기대 뉴스가 유지됐습니다." [ref=e706]':
+                  - generic [ref=e707]: 기술 신호는 좋았지만 단기 과열 구간에서 밀린 사례
+                  - generic [ref=e708]: "뉴스: HBM 관련 기대 뉴스가 유지됐습니다."

@@ -1,0 +1,93 @@
+- main [ref=e3]:
+  - generic [ref=e4]:
+    - generic [ref=e6]:
+      - generic [ref=e7]:
+        - paragraph [ref=e8]: MarketMosaic / Overnight
+        - heading "Tauri 기반 Overnight 전략 워크스페이스" [level=1] [ref=e9]
+        - paragraph [ref=e10]: Judal snapshot, Meilisearch 뉴스, Rust scoring, Tauri desktop workflow를 하나의 로컬 앱으로 통합합니다.
+      - generic [ref=e11]:
+        - generic [ref=e12]: unknown
+        - generic [ref=e13]: v-
+    - generic [ref=e15]: "TypeError: Cannot read properties of undefined (reading 'invoke')"
+    - generic [ref=e16]:
+      - complementary [ref=e17]:
+        - generic [ref=e19]:
+          - heading "신호 생성" [level=2] [ref=e20]
+          - generic [ref=e21]:
+            - text: 기준 날짜
+            - combobox "기준 날짜" [ref=e22]
+          - generic [ref=e23]:
+            - text: 최소 점수
+            - slider "최소 점수 8.0점 이상" [ref=e24] [cursor=pointer]: "8"
+            - generic [ref=e25]: 8.0점 이상
+          - button "신호 생성" [disabled]
+        - generic [ref=e27]:
+          - heading "백테스트 실행" [level=2] [ref=e28]
+          - generic [ref=e29]:
+            - text: 시작 날짜
+            - combobox "시작 날짜" [ref=e30]
+          - generic [ref=e31]:
+            - text: 종료 날짜
+            - combobox "종료 날짜" [ref=e32]
+          - button "백테스트 실행" [disabled]
+        - heading "로컬 경로" [level=2] [ref=e35]
+      - generic [ref=e36]:
+        - generic [ref=e37]:
+          - generic [ref=e38]:
+            - generic [ref=e39]: 백테스트 실행 수
+            - generic [ref=e40]: "0"
+          - generic [ref=e41]:
+            - generic [ref=e42]: 총 거래
+            - generic [ref=e43]: "0"
+          - generic [ref=e44]:
+            - generic [ref=e45]: 평균 승률
+            - generic [ref=e46]: 0.0%
+          - generic [ref=e47]:
+            - generic [ref=e48]: 평균 수익률
+            - generic [ref=e49]: 0.00%
+        - generic [ref=e52]:
+          - generic [ref=e53]:
+            - heading "오늘의 신호" [level=2] [ref=e54]
+            - generic [ref=e55]: 0개
+          - generic [ref=e56]: 신호가 없습니다. 먼저 신호 생성을 실행하세요.
+        - generic [ref=e58]:
+          - heading "최근 실행 요약" [level=3] [ref=e60]
+          - generic [ref=e61]: 백테스트를 실행하면 최근 실행 요약이 여기에 표시됩니다.
+        - generic [ref=e63]:
+          - heading "거래 내역" [level=3] [ref=e64]
+          - generic [ref=e65]:
+            - generic [ref=e66]:
+              - text: 설명 필터
+              - textbox "설명 필터" [ref=e67]:
+                - /placeholder: 정책, MA5, 과열...
+            - generic [ref=e68]:
+              - text: 최소 점수
+              - textbox "최소 점수" [ref=e69]:
+                - /placeholder: "8.0"
+            - generic [ref=e70]:
+              - text: 테마 필터
+              - textbox "테마 필터" [ref=e71]:
+                - /placeholder: 반도체, 로봇...
+            - generic [ref=e72] [cursor=pointer]:
+              - checkbox "수익 거래만 보기" [ref=e73]
+              - generic [ref=e74]: 수익 거래만 보기
+            - generic [ref=e75] [cursor=pointer]:
+              - checkbox "주의 거래만 보기" [ref=e76]
+              - generic [ref=e77]: 주의 거래만 보기
+            - generic [ref=e78] [cursor=pointer]:
+              - checkbox "candle 강세만 보기" [ref=e79]
+              - generic [ref=e80]: candle 강세만 보기
+          - table [ref=e82]:
+            - rowgroup [ref=e83]:
+              - row "날짜 종목 테마 점수 진입가 청산가 수익률 설명" [ref=e84]:
+                - columnheader "날짜" [ref=e85]
+                - columnheader "종목" [ref=e86]
+                - columnheader "테마" [ref=e87]
+                - columnheader "점수" [ref=e88]
+                - columnheader "진입가" [ref=e89]
+                - columnheader "청산가" [ref=e90]
+                - columnheader "수익률" [ref=e91]
+                - columnheader "설명" [ref=e92]
+            - rowgroup [ref=e93]:
+              - row "거래 데이터가 없습니다." [ref=e94]:
+                - cell "거래 데이터가 없습니다." [ref=e95]

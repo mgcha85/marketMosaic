@@ -1,0 +1,27 @@
+services:
+  overnight-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: overnight-app
+    ports:
+      - "1420:1420"
+    env_file:
+      - .env.container
+    volumes:
+      - ./data:/app/data:Z
+      - ../backend/data:/backend/data:ro,Z
+    depends_on:
+      - meilisearch
+
+  meilisearch:
+    image: docker.io/getmeili/meilisearch:v1.15
+    container_name: overnight-meilisearch
+    environment:
+      - MEILI_NO_ANALYTICS=true
+      - MEILI_MASTER_KEY=masterKey
+    volumes:
+      - meili_data:/meili_data:Z
+
+volumes:
+  meili_data:

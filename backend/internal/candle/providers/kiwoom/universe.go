@@ -2,7 +2,6 @@ package kiwoom
 
 import (
 	"encoding/json"
-	"log"
 	"time"
 
 	"dx-unified/internal/candle/model"
@@ -39,18 +38,7 @@ func (c *Client) FetchInstruments() ([]model.Instrument, error) {
 
 		respBody, _, err := c.DoRequest("POST", path, headers, body)
 		if err != nil {
-			log.Printf("Kiwoom API failed for %s (trying mock fallback): %v", m.name, err)
-			// Mock data so we can test DB flow as requested
-			instruments = append(instruments, model.Instrument{
-				Market:    model.MarketKR,
-				Symbol:    "005930",
-				Name:      "삼성전자",
-				Exchange:  m.name,
-				Currency:  "KRW",
-				IsActive:  true,
-				UpdatedAt: now,
-			})
-			continue
+			return nil, err
 		}
 
 		type Item struct {
@@ -63,17 +51,7 @@ func (c *Client) FetchInstruments() ([]model.Instrument, error) {
 
 		var res Response
 		if err := json.Unmarshal(respBody, &res); err != nil {
-			log.Printf("Failed to unmarshal %s response (using mock): %v", m.name, err)
-			instruments = append(instruments, model.Instrument{
-				Market:    model.MarketKR,
-				Symbol:    "005930",
-				Name:      "삼성전자",
-				Exchange:  m.name,
-				Currency:  "KRW",
-				IsActive:  true,
-				UpdatedAt: now,
-			})
-			continue
+			return nil, err
 		}
 
 		for _, item := range res.Output {

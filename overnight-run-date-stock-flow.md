@@ -1,0 +1,123 @@
+- main [ref=e3]:
+  - generic [ref=e4]:
+    - generic [ref=e6]:
+      - generic [ref=e7]:
+        - paragraph [ref=e8]: MarketMosaic / Overnight
+        - heading "Tauri 기반 Overnight 전략 워크스페이스" [level=1] [ref=e9]
+        - paragraph [ref=e10]: Judal snapshot, Meilisearch 뉴스, Rust scoring, Tauri desktop workflow를 하나의 로컬 앱으로 통합합니다.
+      - generic [ref=e11]:
+        - generic [ref=e12]: ok
+        - generic [ref=e13]: v0.1.0-demo
+    - generic [ref=e14]:
+      - complementary [ref=e15]:
+        - generic [ref=e17]:
+          - heading "신호 생성" [level=2] [ref=e18]
+          - generic [ref=e19]:
+            - text: 기준 날짜
+            - 'combobox "기준 날짜 Judal `stock_history` 기준으로 가능한 날짜를 보여줍니다." [ref=e20]'
+            - text: "Judal `stock_history` 기준으로 가능한 날짜를 보여줍니다."
+          - generic [ref=e21]:
+            - text: 최소 점수
+            - slider "최소 점수 8.0점 이상" [ref=e22] [cursor=pointer]: "8"
+            - generic [ref=e23]: 8.0점 이상
+          - button "신호 생성" [ref=e24] [cursor=pointer]
+        - generic [ref=e26]:
+          - heading "백테스트 실행" [level=2] [ref=e27]
+          - generic [ref=e28]:
+            - text: 시작 날짜
+            - combobox "시작 날짜" [ref=e29]
+          - generic [ref=e30]:
+            - text: 종료 날짜
+            - combobox "종료 날짜" [ref=e31]
+          - button "백테스트 실행" [ref=e32] [cursor=pointer]
+          - generic [ref=e33]: 백테스트 입력 날짜도 Judal 가격 히스토리 기준입니다. 뉴스는 각 날짜 기준 최근 3일 + 당일 15:00 이전 기사만 반영합니다.
+        - generic [ref=e35]:
+          - heading "로컬 경로" [level=2] [ref=e36]
+          - generic [ref=e37]:
+            - generic [ref=e38]
+            - generic [ref=e41]
+      - generic [ref=e44]:
+        - generic [ref=e45]:
+          - generic [ref=e46]:
+            - generic [ref=e47]: 백테스트 실행 수
+            - generic [ref=e48]: "5"
+          - generic [ref=e49]:
+            - generic [ref=e50]: 총 거래
+            - generic [ref=e51]: "14"
+          - generic [ref=e52]:
+            - generic [ref=e53]: 평균 승률
+            - generic [ref=e54]: 61.7%
+          - generic [ref=e55]:
+            - generic [ref=e56]: 평균 수익률
+            - generic [ref=e57]: 1.26%
+        - generic [ref=e59]:
+          - generic [ref=e60]:
+            - heading "백테스트 실행 선택" [level=3] [ref=e61]
+            - generic [ref=e62]: 전체 5회 집계
+          - generic [ref=e63]:
+            - generic [ref=e64]
+            - generic [ref=e66]: 상단 숫자는 모든 백테스트 실행의 누적 통계이고, 아래 거래표는 선택한 실행 1건의 거래만 보여줍니다.
+        - generic [ref=e68]:
+          - generic [ref=e69]:
+            - heading "매매일지 분석 흐름" [level=3] [ref=e70]
+            - generic [ref=e71]: "Run #17"
+          - generic [ref=e72]:
+            - generic [ref=e73]
+            - generic [ref=e75]: 선택한 run 안에서 특정 매매일을 고르면, 그날 평가된 후보들의 통과/탈락과 이유를 확인하고, 이어서 개별 종목 증거를 drilldown 할 수 있습니다.
+        - generic [ref=e77]:
+          - generic [ref=e78]:
+            - heading "그날 강했던 테마" [level=3] [ref=e79]
+            - generic [ref=e80]: 5개 섹션
+          - generic [ref=e81]:
+            - generic [ref=e82]
+            - generic [ref=e90]
+            - generic [ref=e98]
+            - generic [ref=e106]
+            - generic [ref=e114]
+        - generic [ref=e122]:
+          - generic [ref=e123]:
+            - generic [ref=e124]: 검토 일자
+            - generic [ref=e125]: 2026-04-09
+          - generic [ref=e126]:
+            - generic [ref=e127]: 실매매 수
+            - generic [ref=e128]: "1"
+          - generic [ref=e129]:
+            - generic [ref=e130]: 점수 통과
+            - generic [ref=e131]: "3"
+          - generic [ref=e132]:
+            - generic [ref=e133]: 점수 탈락
+            - generic [ref=e134]: "2"
+        - generic [ref=e135]:
+          - generic [ref=e137]:
+            - generic [ref=e138]
+            - generic [ref=e142]
+            - generic [ref=e195]
+          - generic [ref=e238]:
+            - generic [ref=e240]
+            - generic [ref=e337]
+            - generic [ref=e346]
+            - generic [ref=e387]
+            - generic [ref=e435]
+            - generic [ref=e476]
+            - generic [ref=e524]
+            - generic [ref=e592]
+        - generic [ref=e624]:
+          - generic [ref=e625]:
+            - heading "최근 실행 요약" [level=3] [ref=e626]
+            - generic [ref=e627]: "Run #17"
+          - generic [ref=e628]:
+            - generic [ref=e629]
+            - generic [ref=e632]
+            - generic [ref=e635]
+        - generic [ref=e639]:
+          - heading "거래 내역" [level=3] [ref=e640]
+          - generic [ref=e641]:
+            - generic [ref=e642]
+            - generic [ref=e644]
+            - generic [ref=e646]
+            - generic [ref=e648] [cursor=pointer]
+            - generic [ref=e651] [cursor=pointer]
+            - generic [ref=e654] [cursor=pointer]
+          - table [ref=e658]:
+            - rowgroup [ref=e659]
+            - rowgroup [ref=e669]
